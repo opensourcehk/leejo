@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/render"
 	"net/http"
 	"regexp"
 	"strings"
@@ -51,6 +52,9 @@ func main() {
 	m := martini.Classic()
 	m.Use(martini.Recovery())
 
+	// render html template from template
+	m.Use(render.Renderer())
+
 	// map the MapEncoder middleware
 	m.Use(MapEncoder)
 
@@ -67,6 +71,15 @@ func main() {
 		})
 		r.Delete("/:id", func(params martini.Params, enc Encoder) []byte {
 			return Must(enc.Encode("Delete " + params["id"]))
+		})
+	})
+
+	// Frontend
+	m.Group("/", func(r martini.Router) {
+		r.Get("", func(r render.Render) {
+			r.HTML(200, "home", map[string]interface{}{
+				"hello": "world",
+			})
 		})
 	})
 
