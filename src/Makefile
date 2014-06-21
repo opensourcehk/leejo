@@ -11,3 +11,5 @@ github.com/go-martini/martini:
 
 github.com/lib/pq:
 	go get github.com/lib/pq
+
+.PHONY: margin pq
