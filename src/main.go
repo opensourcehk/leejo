@@ -84,8 +84,43 @@ func main() {
 
 	// User
 	m.Group("/api.v1/user", func(r martini.Router) {
+		r.Get("", func(params martini.Params, enc Encoder, r *http.Request) []byte {
+			userCollection, err := sess.Collection("leejo_user")
+			if err != nil {
+				panic(err)
+			}
+
+			// retrieve all users
+			res := userCollection.Find()
+			var users []User
+			err = res.All(&users)
+			if err != nil {
+				panic(err)
+			}
+
+			return Must(enc.Encode(Resp{
+				Status: "OK",
+				Result: users,
+			}))
+		})
 		r.Get("/:id", func(params martini.Params, enc Encoder, r *http.Request) []byte {
-			return Must(enc.Encode("Create User"))
+			userCollection, err := sess.Collection("leejo_user")
+			if err != nil {
+				panic(err)
+			}
+
+			// retrieve all users of id(s)
+			res := userCollection.Find(db.Cond{"user_id": params["id"]})
+			var users []User
+			err = res.All(&users)
+			if err != nil {
+				panic(err)
+			}
+
+			return Must(enc.Encode(Resp{
+				Status: "OK",
+				Result: users,
+			}))
 		})
 		r.Post("", binding.Bind(User{}), func(user User, enc Encoder) []byte {
 			userCollection, err := sess.Collection("leejo_user")
