@@ -27,18 +27,12 @@ func testUser() (err error) {
 
 	resultNum = len(result.Result)
 	if resultNum != 1 {
+		fmt.Printf("Raw: %s\n", resp.RawText())
 		return fmt.Errorf("Bad response in create user. "+
 			"There are %d results (expecting 1)",
 			resultNum)
 	}
 	fmt.Printf("Success creating user\n")
-
-	// for debug only
-	for i := 0; i < resultNum; i++ {
-		user := result.Result[i].(User)
-		fmt.Printf("User: %#v\n", user)
-	}
-	// debug help end
 
 	// retrieve the user
 	resp, err = napping.Get("http://localhost:8080/api.v1/user/1",
