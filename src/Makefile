@@ -1,8 +1,10 @@
-build: martini martini-render upper-db upper-db-pgsql
+build: martini martini-binding martini-render upper-db upper-db-pgsql
 	go fmt
 	go build -o ${BIN}/leejo_server
 
 martini: github.com/go-martini/martini
+
+martini-binding: github.com/martini-contrib/binding
 
 martini-render: github.com/martini-contrib/render
 
@@ -16,6 +18,9 @@ upper-db-pgsql: upper.io/db/postgresql gopostgresql
 
 github.com/go-martini/martini:
 	go get github.com/go-martini/martini
+
+github.com/martini-contrib/binding:
+	go get github.com/martini-contrib/binding
 
 github.com/martini-contrib/render:
 	go get github.com/martini-contrib/render
@@ -32,4 +37,4 @@ upper.io/db:
 upper.io/db/postgresql:
 	go get upper.io/postgresql
 
-.PHONY: build martini martini-render upper-db upper-db-pgsql gopostgresql gosexy-to
+.PHONY: build martini martini-binding martini-render upper-db upper-db-pgsql gopostgresql gosexy-to

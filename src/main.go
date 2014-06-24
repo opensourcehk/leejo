@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/render"
 	"net/http"
 	"regexp"
@@ -86,8 +87,8 @@ func main() {
 		r.Get("/:id", func(params martini.Params, enc Encoder, r *http.Request) []byte {
 			return Must(enc.Encode("Create User"))
 		})
-		r.Post("", func(params martini.Params, enc Encoder) []byte {
-			return Must(enc.Encode("Create / Update User"))
+		r.Post("", binding.Bind(User{}), func(user User, enc Encoder) []byte {
+			return Must(enc.Encode([]User{user}))
 		})
 		r.Put("/:id", func(params martini.Params, enc Encoder) []byte {
 			return Must(enc.Encode("Replace " + params["id"]))
