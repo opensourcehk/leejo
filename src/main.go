@@ -93,7 +93,10 @@ func main() {
 				panic(err)
 			}
 			userCollection.Append(user)
-			return Must(enc.Encode([]User{user}))
+			return Must(enc.Encode(Resp{
+				Status: "OK",
+				Result: []User{user},
+			}))
 		})
 		r.Put("/:id", func(params martini.Params, enc Encoder) []byte {
 			return Must(enc.Encode("Replace " + params["id"]))
