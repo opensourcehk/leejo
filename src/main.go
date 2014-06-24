@@ -1,11 +1,14 @@
 package main
 
 import (
+	"flag"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"net/http"
 	"regexp"
 	"strings"
+	"upper.io/db"
+	"upper.io/db/postgresql"
 )
 
 // The regex to check for the requested format (allows an optional trailing
@@ -47,6 +50,26 @@ func MapEncoder(c martini.Context, w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	// parse flags
+	dbhost := flag.String("dbhost", "localhost", "Hostname of the database")
+	dbname := flag.String("dbname", "", "Name of the database")
+	dbuser := flag.String("dbuser", "", "Name of the database user")
+	dbpass := flag.String("dbpass", "", "Password of the database user")
+	flag.Parse()
+
+	// connect to database
+	var dbsettings = db.Settings{
+		Host:     *dbhost,
+		Database: *dbname,
+		User:     *dbuser,
+		Password: *dbpass,
+	}
+	sess, err := db.Open(postgresql.Adapter, dbsettings)
+	if err != nil {
+		panic(err)
+	}
+	defer sess.Close()
 
 	// martini
 	m := martini.Classic()
