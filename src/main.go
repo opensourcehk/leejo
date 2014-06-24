@@ -127,7 +127,14 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			userCollection.Append(user)
+
+			// add the user to user collection
+			userId, err := userCollection.Append(user)
+			if err != nil {
+				panic(err)
+			}
+			user.UserId = userId.(int64)
+
 			return Must(enc.Encode(Resp{
 				Status: "OK",
 				Result: []User{user},

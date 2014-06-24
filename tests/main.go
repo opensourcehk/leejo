@@ -25,6 +25,7 @@ func testUser() (err error) {
 			"gender":   "F",
 		}, &result, nil)
 
+	// test: has to be 1 row
 	resultNum = len(result.Result)
 	if resultNum != 1 {
 		fmt.Printf("Raw: %s\n", resp.RawText())
@@ -32,10 +33,20 @@ func testUser() (err error) {
 			"There are %d results (expecting 1)",
 			resultNum)
 	}
+
+	// test: the id should not be 0
+	if result.Result[0].UserId == 0 {
+		fmt.Printf("Raw: %s\n", resp.RawText())
+		return fmt.Errorf("Bad response in create user. " +
+			"The returned user has a UserId = 0")
+	}
+
 	fmt.Printf("Success creating user\n")
 
-	// retrieve the user
-	resp, err = napping.Get("http://localhost:8080/api.v1/user/1",
+	// retrieve the user just created
+	resp, err = napping.Get(
+		fmt.Sprintf("http://localhost:8080/api.v1/user/%d",
+			result.Result[0].UserId),
 		&p, &result, nil)
 	if err != nil {
 		return
@@ -44,6 +55,8 @@ func testUser() (err error) {
 		err = fmt.Errorf("I don't know why")
 		return
 	}
+
+
 	fmt.Printf("Integration test %d\n", resp.Status())
 	return
 }
