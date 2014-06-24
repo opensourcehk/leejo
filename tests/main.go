@@ -35,7 +35,8 @@ func testUser() (err error) {
 	}
 
 	// test: the id should not be 0
-	if result.Result[0].UserId == 0 {
+	userId := result.Result[0].UserId
+	if userId == 0 {
 		fmt.Printf("Raw: %s\n", resp.RawText())
 		return fmt.Errorf("Bad response in create user. " +
 			"The returned user has a UserId = 0")
@@ -46,16 +47,20 @@ func testUser() (err error) {
 	// retrieve the user just created
 	resp, err = napping.Get(
 		fmt.Sprintf("http://localhost:8080/api.v1/user/%d",
-			result.Result[0].UserId),
+			userId),
 		&p, &result, nil)
 	if err != nil {
 		return
 	}
-	if resp.Status() == 404 {
-		err = fmt.Errorf("I don't know why")
+
+	// test: delete the user just created
+	resp, err = napping.Delete(
+		fmt.Sprintf("http://localhost:8080/api.v1/user/%d",
+			userId),
+		&result, nil)
+	if err != nil {
 		return
 	}
-
 
 	fmt.Printf("Integration test %d\n", resp.Status())
 	return

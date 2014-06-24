@@ -144,7 +144,28 @@ func main() {
 			return Must(enc.Encode("Replace " + params["id"]))
 		})
 		r.Delete("/:id", func(params martini.Params, enc Encoder) []byte {
-			return Must(enc.Encode("Delete " + params["id"]))
+			userCollection, err := sess.Collection("leejo_user")
+			if err != nil {
+				panic(err)
+			}
+
+			// retrieve all users of id(s)
+			res := userCollection.Find(db.Cond{"user_id": params["id"]})
+			var users []User
+			err = res.All(&users)
+			if err != nil {
+				panic(err)
+			}
+
+			// TODO: if len(users) == 0, return 404 error
+
+			// remove all results from database
+			err = res.Remove()
+			return Must(enc.Encode(Resp{
+				Status: "OK",
+				Result: users,
+			}))
+
 		})
 	})
 
