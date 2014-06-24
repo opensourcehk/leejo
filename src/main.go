@@ -88,6 +88,11 @@ func main() {
 			return Must(enc.Encode("Create User"))
 		})
 		r.Post("", binding.Bind(User{}), func(user User, enc Encoder) []byte {
+			userCollection, err := sess.Collection("leejo_user")
+			if err != nil {
+				panic(err)
+			}
+			userCollection.Append(user)
 			return Must(enc.Encode([]User{user}))
 		})
 		r.Put("/:id", func(params martini.Params, enc Encoder) []byte {
