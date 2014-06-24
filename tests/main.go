@@ -5,14 +5,14 @@ import (
 	"github.com/jmcvetta/napping"
 )
 
-type Resp struct {
-	Status string        `json:"status"`
-	Result []interface{} `json:"result"`
+type UserResp struct {
+	Status string `json:"status"`
+	Result []User `json:"result"`
 }
 
 func testUser() (err error) {
 
-	var result Resp
+	var result UserResp
 	var resp *napping.Response
 	var resultNum int
 

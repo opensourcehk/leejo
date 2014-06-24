@@ -1,9 +1,9 @@
 package main
 
 type User struct {
-	UserId   uint32 `json:"user_id" db:"user_id"`
-	Username string `json:"username" db:"username"`
-	Gender   string `json:"gender" db:"gender"`
+	UserId   uint32 `json:"user_id" db:"user_id,omitempty" form:"-"`
+	Username string `json:"username" db:"username" form:"username"`
+	Gender   string `json:"gender" db:"gender" form:"gender"`
 }
 
 type Skill struct {
