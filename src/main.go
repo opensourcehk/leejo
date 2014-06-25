@@ -140,8 +140,24 @@ func main() {
 				Result: []User{user},
 			}))
 		})
-		r.Put("/:id", func(params martini.Params, enc Encoder) []byte {
-			return Must(enc.Encode("Replace " + params["id"]))
+		r.Put("/:id", binding.Bind(User{}), func(user User, params martini.Params, enc Encoder) []byte {
+			userCollection, err := sess.Collection("leejo_user")
+			if err != nil {
+				panic(err)
+			}
+
+			res := userCollection.Find(db.Cond{"user_id": params["id"]})
+
+			// update the user
+			err = res.Update(user)
+			if err != nil {
+				panic(err)
+			}
+
+			return Must(enc.Encode(Resp{
+				Status: "OK",
+				Result: []User{user},
+			}))
 		})
 		r.Delete("/:id", func(params martini.Params, enc Encoder) []byte {
 			userCollection, err := sess.Collection("leejo_user")
