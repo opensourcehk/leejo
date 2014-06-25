@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/render"
 	"net/http"
 	"regexp"
@@ -82,117 +81,14 @@ func main() {
 	// map the MapEncoder middleware
 	m.Use(MapEncoder)
 
-	// User
-	m.Group("/api.v1/users", func(r martini.Router) {
-		r.Get("", func(params martini.Params, enc Encoder, r *http.Request) []byte {
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
+	// Users related API
+	bindUser("/api.v1/users", &sess, m)
 
-			// retrieve all users
-			res := userCollection.Find()
-			var users []User
-			err = res.All(&users)
-			if err != nil {
-				panic(err)
-			}
+	// UserSkills related API
+	bindUserSkills("/api.v1/userSkills/:user_id", &sess, m)
 
-			return Must(enc.Encode(Resp{
-				Status: "OK",
-				Result: users,
-			}))
-		})
-		r.Get("/:id", func(params martini.Params, enc Encoder, r *http.Request) []byte {
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
-
-			// retrieve all users of id(s)
-			res := userCollection.Find(db.Cond{"user_id": params["id"]})
-			var users []User
-			err = res.All(&users)
-			if err != nil {
-				panic(err)
-			}
-
-			return Must(enc.Encode(Resp{
-				Status: "OK",
-				Result: users,
-			}))
-		})
-		r.Post("", binding.Bind(User{}), func(user User, enc Encoder) []byte {
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
-
-			// add the user to user collection
-			userId, err := userCollection.Append(user)
-			if err != nil {
-				panic(err)
-			}
-			user.UserId = userId.(int64)
-
-			return Must(enc.Encode(Resp{
-				Status: "OK",
-				Result: []User{user},
-			}))
-		})
-		r.Put("/:id", binding.Bind(User{}), func(user User, params martini.Params, enc Encoder) []byte {
-
-			var users []User
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
-
-			res := userCollection.Find(db.Cond{"user_id": params["id"]})
-
-			// update the user
-			err = res.Update(user)
-			if err != nil {
-				panic(err)
-			}
-
-			// retrieve the just updated record from database
-			res = userCollection.Find(db.Cond{"user_id": params["id"]})
-			err = res.All(&users)
-			if err != nil {
-				panic(err)
-			}
-
-			return Must(enc.Encode(Resp{
-				Status: "OK",
-				Result: users,
-			}))
-		})
-		r.Delete("/:id", func(params martini.Params, enc Encoder) []byte {
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
-
-			// retrieve all users of id(s)
-			res := userCollection.Find(db.Cond{"user_id": params["id"]})
-			var users []User
-			err = res.All(&users)
-			if err != nil {
-				panic(err)
-			}
-
-			// TODO: if len(users) == 0, return 404 error
-
-			// remove all results from database
-			err = res.Remove()
-			return Must(enc.Encode(Resp{
-				Status: "OK",
-				Result: users,
-			}))
-
-		})
-	})
+	// UserInterests related API
+	bindUserInterests("/api.v1/userInterests/:user_id", &sess, m)
 
 	// Frontend
 	m.Group("/", func(r martini.Router) {

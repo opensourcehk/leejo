@@ -6,12 +6,14 @@ type User struct {
 	Gender   string `json:"gender" db:"gender" form:"gender"`
 }
 
-type Skill struct {
-	UserId    uint32 `json:"user_id" db:"user_id"`
-	SkillName string `json:"skill_name" db:"skill_name"`
+type UserSkill struct {
+	UserSkillId int64  `json:"user_skill_id" db:"user_skill_id,omitempty" form:"-"`
+	UserId      int64  `json:"user_id" db:"user_id"`
+	SkillName   string `json:"skill_name" db:"skill_name"`
 }
 
-type Interest struct {
-	UserId       uint32 `json:user_id db:"user_id"`
-	InterestName string `json:interest_name db:"interest_name"`
+type UserInterest struct {
+	UserInterestId int64  `json:"user_interest_id" db:"user_interest_id,omitempty" form:"-"`
+	UserId         int64  `json:"user_id" db:"user_id"`
+	InterestName   string `json:"interest_name" db:"interest_name"`
 }
