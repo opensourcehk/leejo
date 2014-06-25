@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/jmcvetta/napping"
+	"github.com/yookoala/restit"
 )
 
 type UserResp struct {
@@ -78,7 +79,7 @@ func testUser() (err error) {
 		"gender":   "M",
 	}
 
-	tester := RestTester{
+	tester := restit.Tester{
 		BaseUrl: "http://localhost:8080/api.v1/users",
 	}
 
