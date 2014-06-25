@@ -141,6 +141,8 @@ func main() {
 			}))
 		})
 		r.Put("/:id", binding.Bind(User{}), func(user User, params martini.Params, enc Encoder) []byte {
+
+			var users []User
 			userCollection, err := sess.Collection("leejo_user")
 			if err != nil {
 				panic(err)
@@ -154,9 +156,16 @@ func main() {
 				panic(err)
 			}
 
+			// retrieve the just updated record from database
+			res = userCollection.Find(db.Cond{"user_id": params["id"]})
+			err = res.All(&users)
+			if err != nil {
+				panic(err)
+			}
+
 			return Must(enc.Encode(Resp{
 				Status: "OK",
-				Result: []User{user},
+				Result: users,
 			}))
 		})
 		r.Delete("/:id", func(params martini.Params, enc Encoder) []byte {

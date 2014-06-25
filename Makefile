@@ -20,4 +20,4 @@ bin/integration_test:
 clean:
 	rm -Rf bin/*
 
-.PHONY: all run build clean
+.PHONY: all run build check checkcheck clean
