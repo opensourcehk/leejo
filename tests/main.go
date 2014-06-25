@@ -79,7 +79,7 @@ func testUser() (err error) {
 	}
 
 	tester := RestTester{
-		BaseUrl: "http://localhost:8080/api.v1/user",
+		BaseUrl: "http://localhost:8080/api.v1/users",
 	}
 
 	// -- Test Create --

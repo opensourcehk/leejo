@@ -83,7 +83,7 @@ func main() {
 	m.Use(MapEncoder)
 
 	// User
-	m.Group("/api.v1/user", func(r martini.Router) {
+	m.Group("/api.v1/users", func(r martini.Router) {
 		r.Get("", func(params martini.Params, enc Encoder, r *http.Request) []byte {
 			userCollection, err := sess.Collection("leejo_user")
 			if err != nil {
