@@ -112,6 +112,14 @@ func testUser() (err error) {
 		panic(err)
 	}
 
+	// -- Extended Test --
+	// test: userSkill test
+	err = testUserSkills(userId)
+	if err != nil {
+		fmt.Printf("Raw: %s\n", resp.RawText())
+		panic(err)
+	}
+
 	// -- Test Delete --
 	// test: delete the user just created
 	_, err = tester.TestDelete(fmt.Sprintf("%d", userId), &userToUpdate, &result)

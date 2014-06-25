@@ -84,6 +84,9 @@ func main() {
 	// Users related API
 	bindUser("/api.v1/users", &sess, m)
 
+	// UserSkills related API
+	bindUserSkills("/api.v1/userSkills/:user_id", &sess, m)
+
 	// Frontend
 	m.Group("/", func(r martini.Router) {
 		r.Get("", func(r render.Render) {
