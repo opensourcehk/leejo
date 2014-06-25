@@ -40,7 +40,7 @@ func (r *UserResp) NthValid(n int) (err error) {
 	return
 }
 
-func (r *UserResp) NthMatchPayload(n int, comp *interface{}) (err error) {
+func (r *UserResp) NthMatches(n int, comp *interface{}) (err error) {
 
 	// check if the item exists
 	err = r.NthExists(n)
@@ -98,7 +98,7 @@ func testUser() (err error) {
 		panic(err)
 	}
 
-	// -- Update Test --
+	// -- Test Update --
 	resp, err = tester.TestUpdate(fmt.Sprintf("%d", userId), &userToUpdate, &result)
 	if err != nil {
 		fmt.Printf("Raw: %s\n", resp.RawText())
@@ -112,14 +112,12 @@ func testUser() (err error) {
 		panic(err)
 	}
 
-	// -- Delete Test --
+	// -- Test Delete --
 	// test: delete the user just created
-	resp, err = napping.Delete(
-		fmt.Sprintf("http://localhost:8080/api.v1/user/%d",
-			userId),
-		&result, nil)
+	_, err = tester.TestDelete(fmt.Sprintf("%d", userId), &userToUpdate, &result)
 	if err != nil {
-		return
+		fmt.Printf("Raw: %s\n", resp.RawText())
+		panic(err)
 	}
 
 	return
