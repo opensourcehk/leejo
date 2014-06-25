@@ -5,9 +5,19 @@ BIN=${GOPATH}/bin
 all: build
 
 run: build
-	${BIN}/server
 
-build:
-	cd src; make GOPATH="${GOPATH}" BIN="${BIN}" $@
+build: bin/leejo_server
 
-.PHONY: all run build
+check: bin/integration_test
+	bin/integration_test
+
+bin/leejo_server:
+	cd src; make GOPATH="${GOPATH}" BIN="${BIN}" build
+
+bin/integration_test:
+	cd tests; make GOPATH="${GOPATH}" BIN="${BIN}" build
+
+clean:
+	rm -Rf bin/*
+
+.PHONY: all run build check checkcheck clean
