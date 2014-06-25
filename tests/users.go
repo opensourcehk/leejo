@@ -120,6 +120,13 @@ func testUser() (err error) {
 		panic(err)
 	}
 
+	// test: userInterest test
+	err = testUserInterests(userId)
+	if err != nil {
+		fmt.Printf("Raw: %s\n", resp.RawText())
+		panic(err)
+	}
+
 	// -- Test Delete --
 	// test: delete the user just created
 	_, err = tester.TestDelete(fmt.Sprintf("%d", userId), &userToUpdate, &result)
