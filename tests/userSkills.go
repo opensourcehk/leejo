@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/jmcvetta/napping"
 	"github.com/yookoala/restit"
 )
 
@@ -40,7 +39,7 @@ func (r *SkillResp) NthValid(n int) (err error) {
 	return
 }
 
-func (r *SkillResp) NthMatches(n int, comp *interface{}) (err error) {
+func (r *SkillResp) GetNth(n int) (o interface{}, err error) {
 
 	// check if the item exists
 	err = r.NthExists(n)
@@ -48,17 +47,25 @@ func (r *SkillResp) NthMatches(n int, comp *interface{}) (err error) {
 		return
 	}
 
+	// return nth pointer
+	o = &r.Result[n]
+
+	return
+
+}
+
+func (r *SkillResp) Match(a interface{}, b interface{}) (err error) {
+
 	// check if the item match the payload
-	userSkill := r.Result[n]
-	cptr := (*comp).(*map[string]interface{})
-	c := *cptr
-	if userSkill.SkillName != c["skill_name"].(string) {
-		err = fmt.Errorf("SkillName is \"%s\" (expected \"%s\")",
-			userSkill.SkillName, c["skill_name"].(string))
+	ptr_a := a.(*UserSkill)
+	ptr_b := b.(*UserSkill)
+	if ptr_a.UserId != ptr_b.UserId {
+		err = fmt.Errorf("UserId not match (\"%d\", \"%d\")",
+			ptr_a.UserId, ptr_b.UserId)
 		return
-	} else if userSkill.UserId != c["user_id"].(int64) {
-		err = fmt.Errorf("UserId is \"%d\" (expected \"%d\")",
-			userSkill.UserId, c["user_id"].(int64))
+	} else if ptr_a.SkillName != ptr_b.SkillName {
+		err = fmt.Errorf("SkillName not match (\"%s\", \"%s\")",
+			ptr_a.SkillName, ptr_b.SkillName)
 		return
 	}
 
@@ -67,61 +74,58 @@ func (r *SkillResp) NthMatches(n int, comp *interface{}) (err error) {
 
 func testUserSkills(userId int64) (err error) {
 
-	var result SkillResp
-	var resp *napping.Response
-	var userIdStr string
+	var resp SkillResp
 
-	userIdStr = fmt.Sprintf("%d", userId)
-
-	skillToCreate := map[string]interface{}{
-		"user_id":    userId,
-		"skill_name": "Dummy Skill", // TODO: use uuid
+	toCreate := UserSkill{
+		UserId:    userId,
+		SkillName: "Dummy Skill", // TODO: use uuid
 	}
-	skillToUpdate := map[string]interface{}{
-		"user_id":    userId,
-		"skill_name": "Dummy Skill Updated",
+	toUpdate := UserSkill{
+		UserId:    userId,
+		SkillName: "Dummy Skill Updated",
 	}
 
-	tester := restit.Tester{
-		BaseUrl: "http://localhost:8080/api.v1/userSkills/" + userIdStr,
-	}
+	test := restit.Rest("User",
+		fmt.Sprintf("http://localhost:8080/api.v1/userSkills/%d", userId))
 
 	// -- Test Create --
-	resp, err = tester.TestCreate(&skillToCreate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
-	userSkillId := result.Result[0].UserSkillId // id of the created user-skill
+	test.Create(&toCreate).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toCreate).
+		RunOrPanic()
+	userSkillId := resp.Result[0].UserSkillId // id of the created user-skill
 
-	// retrieve the user-skill just created
-	_, err = tester.TestRetrieveOne(fmt.Sprintf("%d", userSkillId), &skillToCreate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Retrieve(fmt.Sprintf("%d", userSkillId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toCreate).
+		RunOrPanic()
 
 	// -- Test Update --
-	resp, err = tester.TestUpdate(fmt.Sprintf("%d", userSkillId), &skillToUpdate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Update(fmt.Sprintf("%d", userSkillId), &toUpdate).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toUpdate).
+		RunOrPanic()
 
-	// retrieve the user-skill just updated
-	_, err = tester.TestRetrieveOne(fmt.Sprintf("%d", userSkillId), &skillToUpdate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Retrieve(fmt.Sprintf("%d", userSkillId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toUpdate).
+		RunOrPanic()
 
 	// -- Test Delete --
-	// test: delete the user-skill just created
-	_, err = tester.TestDelete(fmt.Sprintf("%d", userSkillId), &skillToUpdate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Delete(fmt.Sprintf("%d", userSkillId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toUpdate).
+		RunOrPanic()
+
+	test.Retrieve(fmt.Sprintf("%d", userSkillId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(0).
+		RunOrPanic()
 
 	return
 }

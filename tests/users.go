@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/jmcvetta/napping"
 	"github.com/yookoala/restit"
 )
 
@@ -40,7 +39,7 @@ func (r *UserResp) NthValid(n int) (err error) {
 	return
 }
 
-func (r *UserResp) NthMatches(n int, comp *interface{}) (err error) {
+func (r *UserResp) GetNth(n int) (uo interface{}, err error) {
 
 	// check if the item exists
 	err = r.NthExists(n)
@@ -48,17 +47,25 @@ func (r *UserResp) NthMatches(n int, comp *interface{}) (err error) {
 		return
 	}
 
+	// return nth pointer
+	uo = &r.Result[n]
+
+	return
+
+}
+
+func (r *UserResp) Match(a interface{}, b interface{}) (err error) {
+
 	// check if the item match the payload
-	user := r.Result[n]
-	cptr := (*comp).(*map[string]string)
-	c := *cptr
-	if user.Username != c["username"] {
-		err = fmt.Errorf("Username is \"%s\" (expected \"%s\")",
-			user.Username, c["username"])
+	ptr_a := a.(*User)
+	ptr_b := b.(*User)
+	if ptr_a.Username != ptr_b.Username {
+		err = fmt.Errorf("Username not match (\"%s\", \"%s\")",
+			ptr_a.Username, ptr_b.Username)
 		return
-	} else if user.Gender != c["gender"] {
-		err = fmt.Errorf("Gender is \"%s\" (expected \"%s\")",
-			user.Gender, c["gender"])
+	} else if ptr_a.Gender != ptr_b.Gender {
+		err = fmt.Errorf("Gender not match (\"%s\", \"%s\")",
+			ptr_a.Gender, ptr_b.Gender)
 		return
 	}
 
@@ -67,73 +74,70 @@ func (r *UserResp) NthMatches(n int, comp *interface{}) (err error) {
 
 func testUser() (err error) {
 
-	var result UserResp
-	var resp *napping.Response
+	var resp UserResp
 
-	userToCreate := map[string]string{
-		"username": "Tester", // TODO: use uuid
-		"gender":   "F",
+	userToCreate := User{
+		Username: "Tester", // TODO: use uuid
+		Gender:   "F",
 	}
-	userToUpdate := map[string]string{
-		"username": "Tester Updated",
-		"gender":   "M",
+	userToUpdate := User{
+		Username: "Tester Updated",
+		Gender:   "M",
 	}
 
-	tester := restit.Tester{
-		BaseUrl: "http://localhost:8080/api.v1/users",
-	}
+	test := restit.Rest("User", "http://localhost:8080/api.v1/users")
 
 	// -- Test Create --
-	resp, err = tester.TestCreate(&userToCreate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
-	userId := result.Result[0].UserId // id of the created user
+	test.Create(&userToCreate).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &userToCreate).
+		RunOrPanic()
+	userId := resp.Result[0].UserId // id of the created user
 
-	// retrieve the user just created
-	_, err = tester.TestRetrieveOne(fmt.Sprintf("%d", userId), &userToCreate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Retrieve(fmt.Sprintf("%d", userId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &userToCreate).
+		RunOrPanic()
 
 	// -- Test Update --
-	resp, err = tester.TestUpdate(fmt.Sprintf("%d", userId), &userToUpdate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Update(fmt.Sprintf("%d", userId), &userToUpdate).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &userToUpdate).
+		RunOrPanic()
 
-	// retrieve the user just updated
-	_, err = tester.TestRetrieveOne(fmt.Sprintf("%d", userId), &userToUpdate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Retrieve(fmt.Sprintf("%d", userId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &userToUpdate).
+		RunOrPanic()
 
 	// -- Extended Test --
 	// test: userSkill test
 	err = testUserSkills(userId)
 	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
+		return
 	}
 
 	// test: userInterest test
 	err = testUserInterests(userId)
 	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
+		return
 	}
 
 	// -- Test Delete --
-	// test: delete the user just created
-	_, err = tester.TestDelete(fmt.Sprintf("%d", userId), &userToUpdate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Delete(fmt.Sprintf("%d", userId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &userToUpdate).
+		RunOrPanic()
+
+	test.Retrieve(fmt.Sprintf("%d", userId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(0).
+		RunOrPanic()
 
 	return
 }

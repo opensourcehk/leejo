@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/jmcvetta/napping"
 	"github.com/yookoala/restit"
 )
 
@@ -40,7 +39,7 @@ func (r *InterestResp) NthValid(n int) (err error) {
 	return
 }
 
-func (r *InterestResp) NthMatches(n int, comp *interface{}) (err error) {
+func (r *InterestResp) GetNth(n int) (o interface{}, err error) {
 
 	// check if the item exists
 	err = r.NthExists(n)
@@ -48,17 +47,25 @@ func (r *InterestResp) NthMatches(n int, comp *interface{}) (err error) {
 		return
 	}
 
+	// return nth pointer
+	o = &r.Result[n]
+
+	return
+
+}
+
+func (r *InterestResp) Match(a interface{}, b interface{}) (err error) {
+
 	// check if the item match the payload
-	userInterest := r.Result[n]
-	cptr := (*comp).(*map[string]interface{})
-	c := *cptr
-	if userInterest.InterestName != c["interest_name"].(string) {
-		err = fmt.Errorf("InterestName is \"%s\" (expected \"%s\")",
-			userInterest.InterestName, c["interest_name"].(string))
+	ptr_a := a.(*UserInterest)
+	ptr_b := b.(*UserInterest)
+	if ptr_a.UserId != ptr_b.UserId {
+		err = fmt.Errorf("UserId not match (\"%d\", \"%d\")",
+			ptr_a.UserId, ptr_b.UserId)
 		return
-	} else if userInterest.UserId != c["user_id"].(int64) {
-		err = fmt.Errorf("UserId is \"%d\" (expected \"%d\")",
-			userInterest.UserId, c["user_id"].(int64))
+	} else if ptr_a.InterestName != ptr_b.InterestName {
+		err = fmt.Errorf("InterestName not match (\"%s\", \"%s\")",
+			ptr_a.InterestName, ptr_b.InterestName)
 		return
 	}
 
@@ -67,61 +74,58 @@ func (r *InterestResp) NthMatches(n int, comp *interface{}) (err error) {
 
 func testUserInterests(userId int64) (err error) {
 
-	var result InterestResp
-	var resp *napping.Response
-	var userIdStr string
+	var resp InterestResp
 
-	userIdStr = fmt.Sprintf("%d", userId)
-
-	interestToCreate := map[string]interface{}{
-		"user_id":       userId,
-		"interest_name": "Dummy Interest", // TODO: use uuid
+	toCreate := UserInterest{
+		UserId:       userId,
+		InterestName: "Dummy Interest", // TODO: use uuid
 	}
-	interestToUpdate := map[string]interface{}{
-		"user_id":       userId,
-		"interest_name": "Dummy Interest Updated",
+	toUpdate := UserInterest{
+		UserId:       userId,
+		InterestName: "Dummy Interest Updated",
 	}
 
-	tester := restit.Tester{
-		BaseUrl: "http://localhost:8080/api.v1/userInterests/" + userIdStr,
-	}
+	test := restit.Rest("User",
+		fmt.Sprintf("http://localhost:8080/api.v1/userInterests/%d", userId))
 
 	// -- Test Create --
-	resp, err = tester.TestCreate(&interestToCreate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
-	userInterestId := result.Result[0].UserInterestId // id of the created user-interest
+	test.Create(&toCreate).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toCreate).
+		RunOrPanic()
+	userInterestId := resp.Result[0].UserInterestId // id of the created user-interest
 
-	// retrieve the user-interest just created
-	_, err = tester.TestRetrieveOne(fmt.Sprintf("%d", userInterestId), &interestToCreate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Retrieve(fmt.Sprintf("%d", userInterestId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toCreate).
+		RunOrPanic()
 
 	// -- Test Update --
-	resp, err = tester.TestUpdate(fmt.Sprintf("%d", userInterestId), &interestToUpdate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Update(fmt.Sprintf("%d", userInterestId), &toUpdate).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toUpdate).
+		RunOrPanic()
 
-	// retrieve the user-interest just updated
-	_, err = tester.TestRetrieveOne(fmt.Sprintf("%d", userInterestId), &interestToUpdate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Retrieve(fmt.Sprintf("%d", userInterestId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toUpdate).
+		RunOrPanic()
 
 	// -- Test Delete --
-	// test: delete the user-interest just created
-	_, err = tester.TestDelete(fmt.Sprintf("%d", userInterestId), &interestToUpdate, &result)
-	if err != nil {
-		fmt.Printf("Raw: %s\n", resp.RawText())
-		panic(err)
-	}
+	test.Delete(fmt.Sprintf("%d", userInterestId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(1).
+		ExpectResultNth(0, &toUpdate).
+		RunOrPanic()
+
+	test.Retrieve(fmt.Sprintf("%d", userInterestId)).
+		WithResponseAs(&resp).
+		ExpectResultCount(0).
+		RunOrPanic()
 
 	return
 }
