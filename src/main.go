@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/RangelReale/osin"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"net/http"
@@ -71,6 +72,9 @@ func main() {
 	}
 	defer sess.Close()
 
+	// OAuth2 endpoints handler
+	oauth2 := osin.NewServer(osin.NewServerConfig(), &AuthStorage{})
+
 	// martini
 	m := martini.Classic()
 	m.Use(martini.Recovery())
@@ -89,6 +93,25 @@ func main() {
 
 	// UserInterests related API
 	bindUserInterests("/api.v1/userInterests/:user_id", &sess, m)
+
+	// handle OAuth2 endpoints
+	http.HandleFunc("/oauth2/authorize", func(w http.ResponseWriter, r *http.Request) {
+		resp := oauth2.NewResponse()
+		if ar := oauth2.HandleAuthorizeRequest(resp, r); ar != nil {
+			// HANDLE LOGIN PAGE HERE
+			ar.Authorized = true
+			oauth2.FinishAuthorizeRequest(resp, r, ar)
+		}
+		osin.OutputJSON(resp, w, r)
+	})
+	http.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
+		resp := oauth2.NewResponse()
+		if ar := oauth2.HandleAccessRequest(resp, r); ar != nil {
+			ar.Authorized = true
+			oauth2.FinishAccessRequest(resp, r, ar)
+		}
+		osin.OutputJSON(resp, w, r)
+	})
 
 	// Frontend
 	m.Group("/", func(r martini.Router) {
