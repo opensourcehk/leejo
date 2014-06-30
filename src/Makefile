@@ -2,6 +2,9 @@ build: martini martini-binding martini-render osin upper-db upper-db-pgsql
 	go fmt
 	go build -o ${BIN}/leejo_server
 
+test:
+	go test
+
 martini: github.com/go-martini/martini
 
 martini-binding: github.com/martini-contrib/binding
