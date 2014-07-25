@@ -1,11 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/RangelReale/osin"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"upper.io/db"
@@ -50,21 +54,38 @@ func MapEncoder(c martini.Context, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type config struct {
+	Db dbconfig `json:"db"`
+}
+
+type dbconfig struct {
+	Host string `json:"host"`
+	Name string `json:"name"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
+}
+
 func main() {
 
 	// parse flags
-	dbhost := flag.String("dbhost", "localhost", "Hostname of the database")
-	dbname := flag.String("dbname", "", "Name of the database")
-	dbuser := flag.String("dbuser", "", "Name of the database user")
-	dbpass := flag.String("dbpass", "", "Password of the database user")
+	confFn := flag.String("config", "config.json", "Path to config file")
 	flag.Parse()
+
+	// read the config file to conf
+	confFile, err := ioutil.ReadFile(*confFn)
+	if err != nil {
+		fmt.Printf("Failed opening config file \"%s\": %v\n", *confFn, err)
+		os.Exit(1)
+	}
+	conf := config{}
+	json.Unmarshal(confFile, &conf)
 
 	// connect to database
 	var dbsettings = db.Settings{
-		Host:     *dbhost,
-		Database: *dbname,
-		User:     *dbuser,
-		Password: *dbpass,
+		Host:     conf.Db.Host,
+		Database: conf.Db.Name,
+		User:     conf.Db.User,
+		Password: conf.Db.Pass,
 	}
 	sess, err := db.Open(postgresql.Adapter, dbsettings)
 	if err != nil {

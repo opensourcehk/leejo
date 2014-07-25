@@ -5,6 +5,7 @@ BIN=${GOPATH}/bin
 all: build
 
 run: build
+	./bin/leejo_server -config ./data/config.json
 
 build: bin/leejo_server
 
