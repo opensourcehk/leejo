@@ -36,6 +36,16 @@ func (d *apiAuthData) FromOsin(od *osin.AuthorizeData) *apiAuthData {
 	return d
 }
 
+func (d *apiAuthData) ToOsin() (od *osin.AuthorizeData) {
+	od = &osin.AuthorizeData{
+		Code: d.Code,
+		Client: &osin.Client{
+			Id: d.ClientId,
+		},
+	}
+	return
+}
+
 // storage struct to fulfill osin interface
 type AuthStorage struct {
 	Db db.Database
@@ -74,6 +84,26 @@ func (a *AuthStorage) SaveAuthorize(d *osin.AuthorizeData) (err error) {
 // Client information MUST be loaded together.
 // Optionally can return error if expired.
 func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err error) {
+	ac, err := a.Db.Collection("leejo_api_authdata")
+	if err != nil {
+		return
+	}
+
+	ds := []apiAuthData{}
+	res := ac.Find(db.Cond{
+		"code":      d.Code,
+		"client_id": d.Client.Id,
+	})
+	err = res.All(&ds)
+	if err != nil {
+		return
+	}
+
+	if len(ds) > 0 {
+		d = ds[0].ToOsin()
+		// TODO: also load api client data and user data
+	}
+
 	return
 }
 
