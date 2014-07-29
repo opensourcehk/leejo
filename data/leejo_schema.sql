@@ -22,3 +22,10 @@ create table leejo_user_interest (
   interest_name varchar(255) not null default '',
   primary key (user_interest_id)
 );
+
+create table leejo_api_client (
+  id varchar(255) default '',
+  secret varchar(255) default '',
+  redirect_uri varchar(255) default '',
+  primary key (id)
+);

@@ -2,13 +2,45 @@ package main
 
 import (
 	"github.com/RangelReale/osin"
+	"upper.io/db"
 )
 
+// database adapted struct
+type apiClient struct {
+	Id          string `db:"id"`
+	Secret      string `db:"secret"`
+	RedirectUri string `db:"redirect_uri"`
+}
+
+func (c *apiClient) ToOsin() (oc *osin.Client) {
+	oc = &osin.Client{
+		Id:          c.Id,
+		Secret:      c.Secret,
+		RedirectUri: c.RedirectUri,
+	}
+	return
+}
+
+// storage struct to fulfill osin interface
 type AuthStorage struct {
+	Db db.Database
 }
 
 // GetClient loads the client by id (client_id)
 func (a *AuthStorage) GetClient(id string) (c *osin.Client, err error) {
+	cc, err := a.Db.Collection("leejo_api_client")
+	res := cc.Find(db.Cond{"id": id})
+
+	var cs []apiClient
+	err = res.All(&cs)
+	if err != nil {
+		panic(err)
+	}
+
+	// if there is result, pass it out
+	if len(cs) > 0 {
+		c = cs[0].ToOsin()
+	}
 	return
 }
 

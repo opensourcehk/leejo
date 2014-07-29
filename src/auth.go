@@ -9,7 +9,9 @@ import (
 func bindAuth(authPath string, sessPtr *db.Database) {
 
 	// OAuth2 endpoints handler
-	oauth2 := osin.NewServer(osin.NewServerConfig(), &AuthStorage{})
+	oauth2 := osin.NewServer(osin.NewServerConfig(), &AuthStorage{
+		Db: *sessPtr,
+	})
 
 	// handle OAuth2 endpoints
 	http.HandleFunc(authPath+"/authorize", func(w http.ResponseWriter, r *http.Request) {
