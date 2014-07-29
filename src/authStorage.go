@@ -21,6 +21,21 @@ func (c *apiClient) ToOsin() (oc *osin.Client) {
 	return
 }
 
+// database adapted struct
+type apiAuthData struct {
+	Code     string `db:"code"`
+	UserId   int    `db:"user_id"`
+	ClientId string `db:"client_id"`
+	Created  int    `db:"created_timestamp"`
+	Expired  int    `db:"expired_timestamp"`
+}
+
+func (d *apiAuthData) FromOsin(od *osin.AuthorizeData) *apiAuthData {
+	d.Code = od.Code
+	d.ClientId = od.Client.Id
+	return d
+}
+
 // storage struct to fulfill osin interface
 type AuthStorage struct {
 	Db db.Database
@@ -46,6 +61,12 @@ func (a *AuthStorage) GetClient(id string) (c *osin.Client, err error) {
 
 // SaveAuthorize saves authorize data.
 func (a *AuthStorage) SaveAuthorize(d *osin.AuthorizeData) (err error) {
+	ac, err := a.Db.Collection("leejo_api_authdata")
+	if err != nil {
+		return
+	}
+	dd := (&apiAuthData{}).FromOsin(d)
+	_, err = ac.Append(dd)
 	return
 }
 
