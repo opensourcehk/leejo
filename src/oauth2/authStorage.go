@@ -79,6 +79,7 @@ func (a *AuthStorage) SaveAuthorize(d *osin.AuthorizeData) (err error) {
 		return
 	}
 	dd := (&apiAuthData{}).FromOsin(d)
+	log.Printf("SaveAuthorize: %#v\n", dd)
 	_, err = ac.Append(dd)
 	return
 }
@@ -107,7 +108,6 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 		d = ds[0].ToOsin()
 		// TODO: also load api client data and user data
 	}
-
 	return
 }
 

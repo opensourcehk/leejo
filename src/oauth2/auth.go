@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"github.com/RangelReale/osin"
+	"log"
 	"net/http"
 	"upper.io/db"
 )
@@ -25,6 +26,7 @@ func Bind(authPath string, sessPtr *db.Database) {
 			ar.Authorized = true
 			oauth2.FinishAuthorizeRequest(resp, r, ar)
 		}
+		log.Printf("OAuth2 Authorize Response: %s", resp)
 		osin.OutputJSON(resp, w, r)
 	})
 	http.HandleFunc(authPath+"/token", func(w http.ResponseWriter, r *http.Request) {
