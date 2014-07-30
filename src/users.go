@@ -25,7 +25,7 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 				panic(err)
 			}
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: users,
 			}))
@@ -44,7 +44,7 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 				panic(err)
 			}
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: users,
 			}))
@@ -62,7 +62,7 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 			}
 			user.UserId = userId.(int64)
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: []data.User{user},
 			}))
@@ -90,7 +90,7 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 				panic(err)
 			}
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: users,
 			}))
@@ -113,7 +113,7 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 
 			// remove all results from database
 			err = res.Remove()
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: users,
 			}))

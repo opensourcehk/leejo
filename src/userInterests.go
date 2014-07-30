@@ -28,7 +28,7 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 				panic(err)
 			}
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: userInterests,
 			}))
@@ -50,7 +50,7 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 				panic(err)
 			}
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: userInterests,
 			}))
@@ -76,7 +76,7 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 			}
 			user.UserInterestId = userId.(int64)
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: []data.UserInterest{user},
 			}))
@@ -110,7 +110,7 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 				panic(err)
 			}
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: userInterests,
 			}))
@@ -136,7 +136,7 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 
 			// remove all results from database
 			err = res.Remove()
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: userInterests,
 			}))
