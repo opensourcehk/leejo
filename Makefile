@@ -76,7 +76,10 @@ gopath/src/github.com/RangelReale/osin:
 # tests
 #
 
-bin/integration_test: gopath/src/github.com/jmcvetta/napping gopath/src/github.com/yookoala/restit
+bin/integration_test: \
+	gopath/src/github.com/jmcvetta/napping \
+	gopath/src/github.com/yookoala/restit \
+	gopath/src/github.com/skratchdot/open-golang/open
 	cd tests; go build -o ${BIN}/integration_test
 
 gopath/src/github.com/yookoala/restit:
@@ -84,3 +87,6 @@ gopath/src/github.com/yookoala/restit:
 
 gopath/src/github.com/jmcvetta/napping:
 	go get github.com/jmcvetta/napping
+
+gopath/src/github.com/skratchdot/open-golang/open:
+	go get github.com/skratchdot/open-golang/open
