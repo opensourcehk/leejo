@@ -1,6 +1,6 @@
 
-GOPATH=$(shell pwd)
-BIN=${GOPATH}/bin
+export GOPATH=$(shell pwd)
+export BIN=${GOPATH}/bin
 
 all: build
 
