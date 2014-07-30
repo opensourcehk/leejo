@@ -1,6 +1,7 @@
 package main
 
 import (
+	"data"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/binding"
 	"net/http"
@@ -21,7 +22,7 @@ func bindUserSkills(path string, sessPtr *db.Database, m *martini.ClassicMartini
 			res := userSkillsCol.Find(db.Cond{
 				"user_id": params["user_id"],
 			})
-			var userSkills []UserSkill
+			var userSkills []data.UserSkill
 			err = res.All(&userSkills)
 			if err != nil {
 				panic(err)
@@ -43,7 +44,7 @@ func bindUserSkills(path string, sessPtr *db.Database, m *martini.ClassicMartini
 				"user_skill_id": params["id"],
 				"user_id":       params["user_id"],
 			})
-			var userSkills []UserSkill
+			var userSkills []data.UserSkill
 			err = res.All(&userSkills)
 			if err != nil {
 				panic(err)
@@ -54,8 +55,8 @@ func bindUserSkills(path string, sessPtr *db.Database, m *martini.ClassicMartini
 				Result: userSkills,
 			}))
 		})
-		r.Post("", binding.Bind(UserSkill{}), func(
-			params martini.Params, user UserSkill, enc Encoder) []byte {
+		r.Post("", binding.Bind(data.UserSkill{}), func(
+			params martini.Params, user data.UserSkill, enc Encoder) []byte {
 
 			inputUserId, err := strconv.ParseInt(params["user_id"], 10, 64)
 			if err != nil {
@@ -77,12 +78,12 @@ func bindUserSkills(path string, sessPtr *db.Database, m *martini.ClassicMartini
 
 			return Must(enc.Encode(Resp{
 				Status: "OK",
-				Result: []UserSkill{user},
+				Result: []data.UserSkill{user},
 			}))
 		})
-		r.Put("/:id", binding.Bind(UserSkill{}), func(user UserSkill, params martini.Params, enc Encoder) []byte {
+		r.Put("/:id", binding.Bind(data.UserSkill{}), func(user data.UserSkill, params martini.Params, enc Encoder) []byte {
 
-			var userSkills []UserSkill
+			var userSkills []data.UserSkill
 			userSkillsCol, err := sess.Collection("leejo_user_skill")
 			if err != nil {
 				panic(err)
@@ -125,7 +126,7 @@ func bindUserSkills(path string, sessPtr *db.Database, m *martini.ClassicMartini
 				"user_skill_id": params["id"],
 				"user_id":       params["user_id"],
 			})
-			var userSkills []UserSkill
+			var userSkills []data.UserSkill
 			err = res.All(&userSkills)
 			if err != nil {
 				panic(err)

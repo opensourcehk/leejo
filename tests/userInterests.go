@@ -1,13 +1,14 @@
 package main
 
 import (
+	"data"
 	"fmt"
 	"github.com/yookoala/restit"
 )
 
 type InterestResp struct {
-	Status string         `json:"status"`
-	Result []UserInterest `json:"result"`
+	Status string              `json:"status"`
+	Result []data.UserInterest `json:"result"`
 }
 
 func (r *InterestResp) Count() int {
@@ -57,8 +58,8 @@ func (r *InterestResp) GetNth(n int) (o interface{}, err error) {
 func (r *InterestResp) Match(a interface{}, b interface{}) (err error) {
 
 	// check if the item match the payload
-	ptr_a := a.(*UserInterest)
-	ptr_b := b.(*UserInterest)
+	ptr_a := a.(*data.UserInterest)
+	ptr_b := b.(*data.UserInterest)
 	if ptr_a.UserId != ptr_b.UserId {
 		err = fmt.Errorf("UserId not match (\"%d\", \"%d\")",
 			ptr_a.UserId, ptr_b.UserId)
@@ -76,11 +77,11 @@ func testUserInterests(userId int64) (err error) {
 
 	var resp InterestResp
 
-	toCreate := UserInterest{
+	toCreate := data.UserInterest{
 		UserId:       userId,
 		InterestName: "Dummy Interest", // TODO: use uuid
 	}
-	toUpdate := UserInterest{
+	toUpdate := data.UserInterest{
 		UserId:       userId,
 		InterestName: "Dummy Interest Updated",
 	}

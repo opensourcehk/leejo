@@ -1,6 +1,7 @@
 package main
 
 import (
+	"data"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/binding"
 	"net/http"
@@ -21,7 +22,7 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 			res := userInterestsCol.Find(db.Cond{
 				"user_id": params["user_id"],
 			})
-			var userInterests []UserInterest
+			var userInterests []data.UserInterest
 			err = res.All(&userInterests)
 			if err != nil {
 				panic(err)
@@ -43,7 +44,7 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 				"user_interest_id": params["id"],
 				"user_id":          params["user_id"],
 			})
-			var userInterests []UserInterest
+			var userInterests []data.UserInterest
 			err = res.All(&userInterests)
 			if err != nil {
 				panic(err)
@@ -54,8 +55,8 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 				Result: userInterests,
 			}))
 		})
-		r.Post("", binding.Bind(UserInterest{}), func(
-			params martini.Params, user UserInterest, enc Encoder) []byte {
+		r.Post("", binding.Bind(data.UserInterest{}), func(
+			params martini.Params, user data.UserInterest, enc Encoder) []byte {
 
 			inputUserId, err := strconv.ParseInt(params["user_id"], 10, 64)
 			if err != nil {
@@ -77,12 +78,12 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 
 			return Must(enc.Encode(Resp{
 				Status: "OK",
-				Result: []UserInterest{user},
+				Result: []data.UserInterest{user},
 			}))
 		})
-		r.Put("/:id", binding.Bind(UserInterest{}), func(user UserInterest, params martini.Params, enc Encoder) []byte {
+		r.Put("/:id", binding.Bind(data.UserInterest{}), func(user data.UserInterest, params martini.Params, enc Encoder) []byte {
 
-			var userInterests []UserInterest
+			var userInterests []data.UserInterest
 			userInterestsCol, err := sess.Collection("leejo_user_interest")
 			if err != nil {
 				panic(err)
@@ -125,7 +126,7 @@ func bindUserInterests(path string, sessPtr *db.Database, m *martini.ClassicMart
 				"user_interest_id": params["id"],
 				"user_id":          params["user_id"],
 			})
-			var userInterests []UserInterest
+			var userInterests []data.UserInterest
 			err = res.All(&userInterests)
 			if err != nil {
 				panic(err)
