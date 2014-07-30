@@ -62,7 +62,7 @@ When the server is running, you can test the installation
 by running our integration test. To run, simply run this
 command within the folder this file locates:
 
-    $ make check
+    $ make test
 
 The make script should build and run the integration test
 for you. Please note that the test fails if the leejo

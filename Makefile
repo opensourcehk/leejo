@@ -14,15 +14,16 @@ run: build
 
 build: bin/leejo_server
 
-check: bin/integration_test
+test: bin/integration_test
 	@echo "Integration Test"
 	@bin/integration_test
 
-test:
+check:
 	@echo "Unit Test"
-	cd src; go test
-	cd src/data; go test
-	cd src/oauth2; go test
+	@cd src; go test
+	@cd src/data; go test
+	@cd src/oauth2; go test
+	@cd tests; go test
 
 clean:
 	rm -Rf bin/*
