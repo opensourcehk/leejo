@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"github.com/RangelReale/osin"
+	"log"
 	"upper.io/db"
 )
 
@@ -58,6 +59,7 @@ func (a *AuthStorage) GetClient(id string) (c *osin.Client, err error) {
 
 	var cs []apiClient
 	err = res.All(&cs)
+	log.Printf("GetClient: %s: %#v\n", id, cs)
 	if err != nil {
 		panic(err)
 	}
@@ -71,6 +73,7 @@ func (a *AuthStorage) GetClient(id string) (c *osin.Client, err error) {
 
 // SaveAuthorize saves authorize data.
 func (a *AuthStorage) SaveAuthorize(d *osin.AuthorizeData) (err error) {
+	log.Printf("SaveAuthorize: %#v\n", d)
 	ac, err := a.Db.Collection("leejo_api_authdata")
 	if err != nil {
 		return
@@ -95,6 +98,7 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 		"client_id": d.Client.Id,
 	})
 	err = res.All(&ds)
+	log.Printf("LoadAuthorize: %s: %#v\n", code, ds)
 	if err != nil {
 		return
 	}
