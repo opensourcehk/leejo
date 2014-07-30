@@ -77,7 +77,11 @@ func main() {
 		os.Exit(1)
 	}
 	conf := config{}
-	json.Unmarshal(confFile, &conf)
+	err = json.Unmarshal(confFile, &conf)
+	if err != nil {
+		fmt.Printf("Failed parsing config file \"%s\": %v\n", *confFn, err)
+		os.Exit(1)
+	}
 
 	// connect to database
 	var dbsettings = db.Settings{
