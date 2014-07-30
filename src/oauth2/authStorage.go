@@ -13,13 +13,12 @@ type apiClient struct {
 	RedirectUri string `db:"redirect_uri"`
 }
 
-func (c *apiClient) ToOsin() (oc *osin.Client) {
-	oc = &osin.Client{
+func (c *apiClient) ToOsin() osin.Client {
+	return &osin.DefaultClient{
 		Id:          c.Id,
 		Secret:      c.Secret,
 		RedirectUri: c.RedirectUri,
 	}
-	return
 }
 
 // database adapted struct
@@ -33,14 +32,14 @@ type apiAuthData struct {
 
 func (d *apiAuthData) FromOsin(od *osin.AuthorizeData) *apiAuthData {
 	d.Code = od.Code
-	d.ClientId = od.Client.Id
+	d.ClientId = od.Client.GetId()
 	return d
 }
 
 func (d *apiAuthData) ToOsin() (od *osin.AuthorizeData) {
 	od = &osin.AuthorizeData{
 		Code: d.Code,
-		Client: &osin.Client{
+		Client: &osin.DefaultClient{
 			Id: d.ClientId,
 		},
 	}
@@ -52,8 +51,15 @@ type AuthStorage struct {
 	Db db.Database
 }
 
+func (a *AuthStorage) Clone() osin.Storage {
+	return a
+}
+
+func (a *AuthStorage) Close() {
+}
+
 // GetClient loads the client by id (client_id)
-func (a *AuthStorage) GetClient(id string) (c *osin.Client, err error) {
+func (a *AuthStorage) GetClient(id string) (c osin.Client, err error) {
 	cc, err := a.Db.Collection("leejo_api_client")
 	res := cc.Find(db.Cond{"id": id})
 
@@ -96,7 +102,7 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 	ds := []apiAuthData{}
 	res := ac.Find(db.Cond{
 		"code":      d.Code,
-		"client_id": d.Client.Id,
+		"client_id": d.Client.GetId(),
 	})
 	err = res.All(&ds)
 	log.Printf("LoadAuthorize: %s: %#v\n", code, ds)
