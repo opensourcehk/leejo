@@ -31,12 +31,13 @@ create table leejo_api_client (
 );
 
 create table leejo_api_authdata (
-  code varchar(255) default '',
+  id serial,
+  code varchar(255) default '' unique,
   user_id integer default 0,
   client_id varchar(255) default '',
   scope text,
   state text,
   expired_timestamp integer,
   created_timestamp integer,
-  primary key (user_id, code)
+  primary key (id)
 );
