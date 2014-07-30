@@ -8,6 +8,7 @@ import (
 	"github.com/martini-contrib/render"
 	"io/ioutil"
 	"net/http"
+	"oauth2"
 	"os"
 	"regexp"
 	"strings"
@@ -116,7 +117,7 @@ func main() {
 	bindUserInterests("/api.v1/userInterests/:user_id", &sess, m)
 
 	// handle OAuth2 endpoints
-	bindAuth("/oauth2", &sess)
+	oauth2.Bind("/oauth2", &sess)
 
 	// Frontend
 	m.Group("/", func(r martini.Router) {

@@ -1,4 +1,4 @@
-package main
+package oauth2
 
 import (
 	"github.com/RangelReale/osin"
@@ -6,7 +6,7 @@ import (
 	"upper.io/db"
 )
 
-func bindAuth(authPath string, sessPtr *db.Database) {
+func Bind(authPath string, sessPtr *db.Database) {
 
 	// OAuth2 endpoints handler
 	oauth2 := osin.NewServer(osin.NewServerConfig(), &AuthStorage{
