@@ -9,8 +9,11 @@ import (
 
 func Bind(authPath string, sessPtr *db.Database) {
 
+	conf := osin.NewServerConfig()
+	conf.AllowGetAccessRequest = true
+
 	// OAuth2 endpoints handler
-	oauth2 := osin.NewServer(osin.NewServerConfig(), &AuthStorage{
+	oauth2 := osin.NewServer(conf, &AuthStorage{
 		Db: *sessPtr,
 	})
 
