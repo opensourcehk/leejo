@@ -69,6 +69,10 @@ for you. Please note that the test fails if the leejo
 server process is not running or is not listening to
 localhost:8080.
 
+You must run this test in a Linux environment with a
+proper default browser setting. The test will trigger the
+browser for OAuth2 login.
+
 
 Bug Reports
 -----------
