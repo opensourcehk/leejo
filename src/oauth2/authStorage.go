@@ -23,6 +23,7 @@ func (c *apiClient) ToOsin() osin.Client {
 
 // database adapted struct
 type apiAuthData struct {
+	Id       int    `db:"id,omitempty"`
 	Code     string `db:"code"`
 	UserId   int    `db:"user_id"`
 	ClientId string `db:"client_id"`
