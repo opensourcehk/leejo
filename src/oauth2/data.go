@@ -58,3 +58,40 @@ func (d *apiAuthData) ToOsin() (od *osin.AuthorizeData) {
 	}
 	return
 }
+
+
+// database adapted struct
+type apiAccess struct {
+	Id           int    `db:"id,omitempty"`
+	AccessToken  string `db:"access_token"`
+	RefreshToken string `db:"refresh_token"`
+	ClientId     string `db:"client_id"`
+	UserId       int    `db:"user_id"`
+	Scope        string `db:"scope"`
+	Created      int64  `db:"created_timestamp"`
+	Expired      int64  `db:"expired_timestamp"`
+}
+
+func (d *apiAccess) FromOsin(od *osin.AccessData) *apiAccess {
+	d.AccessToken = od.AccessToken
+	d.RefreshToken = od.RefreshToken
+	d.ClientId = od.Client.GetId()
+	d.Scope = od.Scope
+	d.Created = od.CreatedAt.Unix()
+	d.Expired = od.CreatedAt.Unix() + int64(od.ExpiresIn)
+	return d
+}
+
+func (d *apiAccess) ToOsin() (od *osin.AccessData) {
+	od = &osin.AccessData{
+		AccessToken: d.AccessToken,
+		RefreshToken: d.RefreshToken,
+		Client: &osin.DefaultClient{
+			Id: d.ClientId,
+		},
+		Scope: d.Scope,
+		ExpiresIn: int32(d.Expired - time.Now().Unix()),
+		CreatedAt: time.Unix(d.Created, 0),
+	}
+	return
+}
