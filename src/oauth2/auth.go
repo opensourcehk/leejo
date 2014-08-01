@@ -41,7 +41,7 @@ func Bind(authPath string, sessPtr *db.Database) {
 			// 2. if checking pass, generate and return token (or is it handled already?)
 			ar.Authorized = true
 			oauth2.FinishAccessRequest(resp, r, ar)
-		} else {
+		} else if resp.InternalError != nil {
 			log.Printf("Internal Error: %s", resp.InternalError.Error())
 		}
 		log.Printf("OAuth2 Token Response: %#v", resp)
