@@ -34,7 +34,8 @@ func getCode() (code string, err error) {
 		})
 
 	log.Printf("Test Auth\n")
-	open.Start("http://localhost:8080/oauth2/authorize?response_type=code&client_id=testing")
+	open.Start("http://localhost:8080/oauth2/authorize?" +
+		"response_type=code&client_id=testing&scope=usersInfo")
 
 	// wait for reply
 	log.Printf("wait for result finish\n")
@@ -70,6 +71,8 @@ func testAuth() (token string, err error) {
 	// access token endpoint
 	// and retrieve token
 	open.Start("http://localhost:8080/oauth2/token?" +
-		"grant_type=authorization_code&code=" + code + "&client_id=testing&client_secret=testing")
+		"grant_type=authorization_code&code=" + code +
+		"&client_id=testing&client_secret=testing" +
+		"&redirect_uri=http://localhost:8000/redirect/")
 	return
 }
