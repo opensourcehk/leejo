@@ -148,6 +148,16 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 // RemoveAuthorize revokes or deletes the authorization code.
 func (a *AuthStorage) RemoveAuthorize(code string) (err error) {
 	log.Printf("RemoveAuthorize: %s\n", code)
+	ac, err := a.Db.Collection("leejo_api_authdata")
+	if err != nil {
+		return
+	}
+
+	res := ac.Find(db.Cond{
+		"code":      code,
+	})
+	err = res.Remove()
+
 	return
 }
 
