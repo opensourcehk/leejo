@@ -110,6 +110,13 @@ func (a *AuthStorage) RemoveAuthorize(code string) (err error) {
 // If RefreshToken is not blank, it must save in a way that can be loaded using LoadRefresh.
 func (a *AuthStorage) SaveAccess(ad *osin.AccessData) (err error) {
 	log.Printf("SaveAccess: %#v\n", ad)
+	ac, err := a.Db.Collection("leejo_api_access")
+	if err != nil {
+		return
+	}
+	dd := (&apiAccess{}).FromOsin(ad)
+	log.Printf("SaveAuthorize adapted: %#v\n", dd)
+	_, err = ac.Append(dd)
 	return
 }
 
@@ -118,12 +125,51 @@ func (a *AuthStorage) SaveAccess(ad *osin.AccessData) (err error) {
 // Optionally can return error if expired.
 func (a *AuthStorage) LoadAccess(token string) (d *osin.AccessData, err error) {
 	log.Printf("LoadAccess: %s\n", token)
+	ac, err := a.Db.Collection("leejo_api_access")
+	if err != nil {
+		return
+	}
+
+	ds := []apiAccess{}
+	res := ac.Find(db.Cond{
+		"access_token": token,
+	})
+	err = res.All(&ds)
+	log.Printf("Access retrieved: %s: %#v\n", token, ds)
+	if err != nil {
+		return
+	}
+
+	// get access
+	if len(ds) == 0 {
+		return
+	}
+	d = ds[0].ToOsin()
+	log.Printf("Access.ToOsin: %#v\n", d)
+
+	// also load api client data
+	c, err := a.GetClient(d.Client.GetId())
+	if err != nil {
+		return
+	}
+	d.Client = c
+
 	return
 }
 
 // RemoveAccess revokes or deletes an AccessData.
 func (a *AuthStorage) RemoveAccess(token string) (err error) {
 	log.Printf("RemoveAccess: %s\n", token)
+	ac, err := a.Db.Collection("leejo_api_access")
+	if err != nil {
+		return
+	}
+
+	res := ac.Find(db.Cond{
+		"access_token": token,
+	})
+	err = res.Remove()
+
 	return
 }
 
