@@ -76,6 +76,7 @@ func (a *AuthStorage) GetClient(id string) (c osin.Client, err error) {
 	// if there is result, pass it out
 	if len(cs) > 0 {
 		c = cs[0].ToOsin()
+		log.Printf("Client Obtained: %#v\n", c)
 	}
 	return
 }
@@ -97,6 +98,7 @@ func (a *AuthStorage) SaveAuthorize(d *osin.AuthorizeData) (err error) {
 // Client information MUST be loaded together.
 // Optionally can return error if expired.
 func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err error) {
+	log.Printf("LoadAuthorize: %s\n", code)
 	ac, err := a.Db.Collection("leejo_api_authdata")
 	if err != nil {
 		return
@@ -108,7 +110,7 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 		"client_id": d.Client.GetId(),
 	})
 	err = res.All(&ds)
-	log.Printf("LoadAuthorize: %s: %#v\n", code, ds)
+	log.Printf("AuthData retrieved: %s: %#v\n", code, ds)
 	if err != nil {
 		return
 	}
@@ -122,12 +124,14 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 
 // RemoveAuthorize revokes or deletes the authorization code.
 func (a *AuthStorage) RemoveAuthorize(code string) (err error) {
+	log.Printf("RemoveAuthorize: %s\n", code)
 	return
 }
 
 // SaveAccess writes AccessData.
 // If RefreshToken is not blank, it must save in a way that can be loaded using LoadRefresh.
-func (a *AuthStorage) SaveAccess(*osin.AccessData) (err error) {
+func (a *AuthStorage) SaveAccess(ad *osin.AccessData) (err error) {
+	log.Printf("SaveAccess: %#v\n", ad)
 	return
 }
 
@@ -135,11 +139,13 @@ func (a *AuthStorage) SaveAccess(*osin.AccessData) (err error) {
 // AuthorizeData and AccessData DON'T NEED to be loaded if not easily available.
 // Optionally can return error if expired.
 func (a *AuthStorage) LoadAccess(token string) (d *osin.AccessData, err error) {
+	log.Printf("LoadAccess: %s\n", token)
 	return
 }
 
 // RemoveAccess revokes or deletes an AccessData.
 func (a *AuthStorage) RemoveAccess(token string) (err error) {
+	log.Printf("RemoveAccess: %s\n", token)
 	return
 }
 
@@ -147,10 +153,12 @@ func (a *AuthStorage) RemoveAccess(token string) (err error) {
 // AuthorizeData and AccessData DON'T NEED to be loaded if not easily available.
 // Optionally can return error if expired.
 func (a *AuthStorage) LoadRefresh(token string) (d *osin.AccessData, err error) {
+	log.Printf("LoadRefresh: %s\n", token)
 	return
 }
 
 // RemoveRefresh revokes or deletes refresh AccessData.
 func (a *AuthStorage) RemoveRefresh(token string) (err error) {
+	log.Printf("RemoveRefresh: %s\n", token)
 	return
 }
