@@ -11,6 +11,7 @@ func Bind(authPath string, sessPtr *db.Database) {
 
 	conf := osin.NewServerConfig()
 	conf.AllowGetAccessRequest = true
+	conf.AllowClientSecretInParams = true
 
 	// OAuth2 endpoints handler
 	oauth2 := osin.NewServer(conf, &AuthStorage{
@@ -33,7 +34,15 @@ func Bind(authPath string, sessPtr *db.Database) {
 		osin.OutputJSON(resp, w, r)
 	})
 	http.HandleFunc(authPath+"/token", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Access token endpoint")
 		resp := oauth2.NewResponse()
+
+		// ugly hack to accept GET request in token endpoint
+		// should add this to osin
+		if len(r.Form) == 0 {
+			r.Form = r.URL.Query()
+		}
+
 		if ar := oauth2.HandleAccessRequest(resp, r); ar != nil {
 			log.Printf("Access successful")
 			// TODO:
