@@ -3,6 +3,7 @@ package oauth2
 import (
 	"github.com/RangelReale/osin"
 	"log"
+	"time"
 	"upper.io/db"
 )
 
@@ -23,19 +24,25 @@ func (c *apiClient) ToOsin() osin.Client {
 
 // database adapted struct
 type apiAuthData struct {
-	Id       int    `db:"id,omitempty"`
-	Code     string `db:"code"`
-	UserId   int    `db:"user_id"`
-	ClientId string `db:"client_id"`
-	Scope    string `db:"scope"`
-	Created  int    `db:"created_timestamp"`
-	Expired  int    `db:"expired_timestamp"`
+	Id          int    `db:"id,omitempty"`
+	Code        string `db:"code"`
+	UserId      int    `db:"user_id"`
+	ClientId    string `db:"client_id"`
+	Scope       string `db:"scope"`
+	State       string `db:"state"`
+	RedirectUri string `db:"redirect_uri"`
+	Created     int64  `db:"created_timestamp"`
+	Expired     int64  `db:"expired_timestamp"`
 }
 
 func (d *apiAuthData) FromOsin(od *osin.AuthorizeData) *apiAuthData {
 	d.Code = od.Code
 	d.ClientId = od.Client.GetId()
 	d.Scope = od.Scope
+	d.State = od.State
+	d.RedirectUri = od.RedirectUri
+	d.Created = od.CreatedAt.Unix()
+	d.Expired = od.CreatedAt.Unix() + int64(od.ExpiresIn)
 	return d
 }
 
@@ -45,6 +52,11 @@ func (d *apiAuthData) ToOsin() (od *osin.AuthorizeData) {
 		Client: &osin.DefaultClient{
 			Id: d.ClientId,
 		},
+		Scope: d.Scope,
+		State: d.State,
+		RedirectUri: d.RedirectUri,
+		ExpiresIn: int32(d.Expired - time.Now().Unix()),
+		CreatedAt: time.Unix(d.Created, 0),
 	}
 	return
 }
@@ -106,8 +118,7 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 
 	ds := []apiAuthData{}
 	res := ac.Find(db.Cond{
-		"code":      d.Code,
-		"client_id": d.Client.GetId(),
+		"code":      code,
 	})
 	err = res.All(&ds)
 	log.Printf("AuthData retrieved: %s: %#v\n", code, ds)
@@ -115,10 +126,22 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 		return
 	}
 
-	if len(ds) > 0 {
-		d = ds[0].ToOsin()
-		// TODO: also load api client data and user data
+	// get authdata
+	if len(ds) == 0 {
+		return
 	}
+	d = ds[0].ToOsin()
+	log.Printf("AuthData.ToOsin: %#v\n", d)
+
+	// also load api client data
+	c, err := a.GetClient(d.Client.GetId())
+	if err != nil {
+		return
+	}
+	d.Client = c
+
+	// TODO: also load user data
+
 	return
 }
 
