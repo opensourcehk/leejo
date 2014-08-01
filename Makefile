@@ -9,7 +9,7 @@ export BIN=${ROOT}/bin
 
 all: build
 
-run: build
+serve: build
 	./bin/leejo_server -config ./data/config.json
 
 build: bin/leejo_server
@@ -28,7 +28,7 @@ check:
 clean:
 	rm -Rf bin/*
 
-.PHONY: all run build check test clean
+.PHONY: all serve build check test clean
 
 
 
