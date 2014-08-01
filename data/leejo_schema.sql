@@ -35,8 +35,9 @@ create table leejo_api_authdata (
   code varchar(255) default '' unique,
   user_id integer default 0,
   client_id varchar(255) default '',
-  scope text,
-  state text,
+  scope varchar(255) default '',
+  state varchar(255) default '',
+  redirect_uri varchar(255) default '',
   expired_timestamp integer,
   created_timestamp integer,
   primary key (id)
