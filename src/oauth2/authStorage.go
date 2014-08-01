@@ -27,6 +27,7 @@ type apiAuthData struct {
 	Code     string `db:"code"`
 	UserId   int    `db:"user_id"`
 	ClientId string `db:"client_id"`
+	Scope    string `db:"scope"`
 	Created  int    `db:"created_timestamp"`
 	Expired  int    `db:"expired_timestamp"`
 }
@@ -34,6 +35,7 @@ type apiAuthData struct {
 func (d *apiAuthData) FromOsin(od *osin.AuthorizeData) *apiAuthData {
 	d.Code = od.Code
 	d.ClientId = od.Client.GetId()
+	d.Scope = od.Scope
 	return d
 }
 
