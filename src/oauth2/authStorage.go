@@ -178,11 +178,50 @@ func (a *AuthStorage) RemoveAccess(token string) (err error) {
 // Optionally can return error if expired.
 func (a *AuthStorage) LoadRefresh(token string) (d *osin.AccessData, err error) {
 	log.Printf("LoadRefresh: %s\n", token)
+	ac, err := a.Db.Collection("leejo_api_access")
+	if err != nil {
+		return
+	}
+
+	ds := []apiAccess{}
+	res := ac.Find(db.Cond{
+		"refresh_token": token,
+	})
+	err = res.All(&ds)
+	log.Printf("Access (Refresh) retrieved: %s: %#v\n", token, ds)
+	if err != nil {
+		return
+	}
+
+	// get access
+	if len(ds) == 0 {
+		return
+	}
+	d = ds[0].ToOsin()
+	log.Printf("Access.ToOsin: %#v\n", d)
+
+	// also load api client data
+	c, err := a.GetClient(d.Client.GetId())
+	if err != nil {
+		return
+	}
+	d.Client = c
+
 	return
 }
 
 // RemoveRefresh revokes or deletes refresh AccessData.
 func (a *AuthStorage) RemoveRefresh(token string) (err error) {
 	log.Printf("RemoveRefresh: %s\n", token)
+	ac, err := a.Db.Collection("leejo_api_access")
+	if err != nil {
+		return
+	}
+
+	res := ac.Find(db.Cond{
+		"refresh_token": token,
+	})
+	err = res.Remove()
+
 	return
 }
