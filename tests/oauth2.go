@@ -14,8 +14,10 @@ func getAuthCode() (code string, err error) {
 	ch := make(chan interface{})
 
 	// temporary serve the redirect endpoint
-	go TempServe(":8000", "/redirect/", ch,
-		func(w http.ResponseWriter, r *http.Request) {
+	go func() {
+
+		// handler for authentication_code test
+		http.HandleFunc("/redirect/", func(w http.ResponseWriter, r *http.Request) {
 			q := r.URL.Query()
 			log.Printf("Called handler function: %#v\n", q)
 
@@ -28,13 +30,17 @@ func getAuthCode() (code string, err error) {
 			} else if _, ok := q["state"]; !ok {
 				fmt.Fprintf(w, "Unknown error. Failed to obtain state\n")
 			} else {
-				fmt.Fprintf(w, "Login Success! Please go back to console to see test result\n")
+				fmt.Fprintf(w, "Login Success! Please go back to console "+
+					"to see test result\n")
 			}
 
 			ch <- q
 			return
 		})
 
+		log.Fatal(http.ListenAndServe(":8000", nil))
+
+	}()
 	log.Printf("Test Auth\n")
 	open.Start("http://localhost:8080/oauth2/authorize?" +
 		"response_type=code&client_id=testing&scope=usersInfo")
