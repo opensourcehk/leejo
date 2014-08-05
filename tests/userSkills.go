@@ -73,7 +73,7 @@ func (r *SkillResp) Match(a interface{}, b interface{}) (err error) {
 	return
 }
 
-func testUserSkills(userId int64) (err error) {
+func testUserSkills(token string, userId int64) (err error) {
 
 	var resp SkillResp
 

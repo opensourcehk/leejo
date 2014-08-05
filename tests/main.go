@@ -7,13 +7,13 @@ import (
 func main() {
 
 	// test authentication service
-	_, err := testAuth()
+	token, err := testAuth()
 	if err != nil {
 		panic(err)
 	}
 
 	// test APIs
-	err = testUser()
+	err = testUser(token)
 	if err != nil {
 		panic(err)
 	}

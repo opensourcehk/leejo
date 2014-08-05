@@ -73,7 +73,7 @@ func (r *UserResp) Match(a interface{}, b interface{}) (err error) {
 	return
 }
 
-func testUser() (err error) {
+func testUser(token string) (err error) {
 
 	var resp UserResp
 
@@ -117,13 +117,13 @@ func testUser() (err error) {
 
 	// -- Extended Test --
 	// test: userSkill test
-	err = testUserSkills(userId)
+	err = testUserSkills(token, userId)
 	if err != nil {
 		return
 	}
 
 	// test: userInterest test
-	err = testUserInterests(userId)
+	err = testUserInterests(token, userId)
 	if err != nil {
 		return
 	}

@@ -73,7 +73,7 @@ func (r *InterestResp) Match(a interface{}, b interface{}) (err error) {
 	return
 }
 
-func testUserInterests(userId int64) (err error) {
+func testUserInterests(token string, userId int64) (err error) {
 
 	var resp InterestResp
 
