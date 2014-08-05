@@ -9,15 +9,16 @@ import (
 	"net/url"
 )
 
-// obtain authorization code
-func getAuthCode() (code string, err error) {
-	ch := make(chan interface{})
+// serve redirection endpoints for test
+func serveRedirectEnd(addr string, basePath string) (ch chan interface{}) {
+
+	ch = make(chan interface{})
 
 	// temporary serve the redirect endpoint
 	go func() {
 
 		// handler for authentication_code test
-		http.HandleFunc("/redirect/authcode/", func(w http.ResponseWriter, r *http.Request) {
+		http.HandleFunc(basePath + "authcode/", func(w http.ResponseWriter, r *http.Request) {
 			q := r.URL.Query()
 			log.Printf("Called handler function: %#v\n", q)
 
@@ -38,10 +39,18 @@ func getAuthCode() (code string, err error) {
 			return
 		})
 
-		log.Fatal(http.ListenAndServe(":8000", nil))
+		log.Fatal(http.ListenAndServe(addr, nil))
 
 	}()
+
+	return
+}
+
+// obtain authorization code
+func getAuthCode(ch chan interface{}) (code string, err error) {
+
 	log.Printf("Test Auth\n")
+
 	params := url.Values{}
 	params.Set("response_type", "code")
 	params.Set("client_id", "testing")
@@ -157,9 +166,12 @@ func refreshToken(refreshT string) (tResp tokenResp, err error) {
 // main test on authentication and authorization routine
 func testAuth() (accessT string, err error) {
 
+	// serve up redirection endpoint(s)
+	ch := serveRedirectEnd(":8000", "/redirect/")
+
 	// 1. use default browser to access authorize endpoint
 	// 2. emulate redirect endpoint and retrieve code
-	code, err := getAuthCode()
+	code, err := getAuthCode(ch)
 	if err != nil {
 		return
 	}
