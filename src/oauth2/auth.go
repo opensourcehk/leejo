@@ -16,6 +16,10 @@ func Bind(authPath string, sessPtr *db.Database) {
 		osin.AUTHORIZATION_CODE,
 		osin.REFRESH_TOKEN,
 	}
+	conf.AllowedAuthorizeTypes = osin.AllowedAuthorizeType{
+		osin.CODE,
+		osin.TOKEN,
+	}
 
 	// OAuth2 endpoints handler
 	oauth2 := osin.NewServer(conf, &AuthStorage{
