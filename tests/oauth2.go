@@ -17,7 +17,7 @@ func getAuthCode() (code string, err error) {
 	go func() {
 
 		// handler for authentication_code test
-		http.HandleFunc("/redirect/", func(w http.ResponseWriter, r *http.Request) {
+		http.HandleFunc("/redirect/authcode/", func(w http.ResponseWriter, r *http.Request) {
 			q := r.URL.Query()
 			log.Printf("Called handler function: %#v\n", q)
 
@@ -42,8 +42,12 @@ func getAuthCode() (code string, err error) {
 
 	}()
 	log.Printf("Test Auth\n")
-	open.Start("http://localhost:8080/oauth2/authorize?" +
-		"response_type=code&client_id=testing&scope=usersInfo")
+	params := url.Values{}
+	params.Set("response_type", "code")
+	params.Set("client_id", "testing")
+	params.Set("scope", "usersInfo")
+	params.Set("redirect_uri", "http://localhost:8000/redirect/authcode/")
+	open.Start("http://localhost:8080/oauth2/authorize?" + params.Encode())
 
 	// wait for reply
 	log.Printf("wait for result finish\n")
@@ -91,10 +95,14 @@ func getToken(code string) (tResp tokenResp, err error) {
 
 	// generate token request
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://localhost:8080/oauth2/token?" +
-		"grant_type=authorization_code&code=" + code +
-		"&client_id=testing&client_secret=testing" +
-		"&redirect_uri=http://localhost:8000/redirect/", nil)
+	params := url.Values{}
+	params.Set("grant_type", "authorization_code")
+	params.Set("client_id", "testing")
+	params.Set("client_secret", "testing")
+	params.Set("code", code)
+	params.Set("redirect_uri", "http://localhost:8000/redirect/authcode/")
+	req, err := http.NewRequest("GET",
+		"http://localhost:8080/oauth2/token?" + params.Encode(), nil)
 
 	resp, err := client.Do(req)
 	defer resp.Body.Close()
