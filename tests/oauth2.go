@@ -10,14 +10,14 @@ import (
 )
 
 // serve redirection endpoints for test
-func serveRedirectEnd(addr string, basePath string) (ch chan interface{}) {
+func serveRedirectEnd(addr string, basePath string) (ch chan chanResp) {
 
-	ch = make(chan interface{})
+	ch = make(chan chanResp)
 
 	// temporary serve the redirect endpoint
 	go func() {
 
-		// handler for authentication_code test
+		// handler for response_type=authentication_code test
 		http.HandleFunc(basePath + "authcode/", func(w http.ResponseWriter, r *http.Request) {
 			q := r.URL.Query()
 			log.Printf("Called handler function: %#v\n", q)
@@ -35,9 +35,26 @@ func serveRedirectEnd(addr string, basePath string) (ch chan interface{}) {
 					"to see test result\n")
 			}
 
-			ch <- q
+			ch <- chanResp{
+				Data: q,
+			}
 			return
 		})
+
+		// handler for response_type=token test
+		http.HandleFunc(basePath + "token/", func(w http.ResponseWriter, r *http.Request) {
+			q := r.URL.Query()
+			log.Printf("Called handler function 2: %#v\n", q)
+
+			// test if there is error
+			fmt.Fprintf(w, "<b>Hello token</b>\n")
+
+			ch <- chanResp{
+				Data: q,
+			}
+			return
+		})
+
 
 		log.Fatal(http.ListenAndServe(addr, nil))
 
@@ -47,7 +64,7 @@ func serveRedirectEnd(addr string, basePath string) (ch chan interface{}) {
 }
 
 // obtain authorization code
-func getAuthCode(ch chan interface{}) (code string, err error) {
+func getAuthCodeResp(ch chan chanResp) (code string, err error) {
 
 	log.Printf("Test Auth\n")
 
@@ -61,7 +78,12 @@ func getAuthCode(ch chan interface{}) (code string, err error) {
 	// wait for reply
 	log.Printf("wait for result finish\n")
 	res := <-ch
-	result := res.(url.Values)
+	if res.Err != nil {
+		log.Fatalf("Failed: Error: %s\n", res.Err.Error())
+	}
+
+	// cast result data
+	result := res.Data.(url.Values)
 
 	// test if there is error
 	if _, ok := result["error"]; ok {
@@ -78,6 +100,47 @@ func getAuthCode(ch chan interface{}) (code string, err error) {
 	log.Printf("result: code=\"%s\" state=\"%s\"\n", code, state)
 
 	return
+}
+
+// obtain authorization code
+func getTokenResp(ch chan chanResp) (code string, err error) {
+
+	log.Printf("Test Auth (response_type=token)\n")
+
+	params := url.Values{}
+	params.Set("response_type", "token")
+	params.Set("client_id", "testing")
+	params.Set("scope", "usersInfo")
+	params.Set("redirect_uri", "http://localhost:8000/redirect/token/")
+	open.Start("http://localhost:8080/oauth2/authorize?" + params.Encode())
+
+	// wait for reply
+	log.Printf("wait for result finish\n")
+	_ = <-ch
+/*
+	result := res.(url.Values)
+
+	// test if there is error
+	if _, ok := result["error"]; ok {
+		errStr := result.Get("error")
+		log.Fatalf("Failed to login. Error: %s\n", errStr)
+	} else if _, ok := result["code"]; !ok {
+		log.Fatalf("Unknown error. Failed to obtain code\n")
+	} else if _, ok := result["state"]; !ok {
+		log.Fatalf("Unknown error. Failed to obtain state\n")
+	}
+
+	code = result.Get("code")
+	state := result.Get("state")
+	log.Printf("result: code=\"%s\" state=\"%s\"\n", code, state)
+*/
+	return
+}
+
+
+type chanResp struct {
+	Data interface{}
+	Err error
 }
 
 type tokenResp struct {
@@ -171,7 +234,7 @@ func testAuth() (accessT string, err error) {
 
 	// 1. use default browser to access authorize endpoint
 	// 2. emulate redirect endpoint and retrieve code
-	code, err := getAuthCode(ch)
+	code, err := getAuthCodeResp(ch)
 	if err != nil {
 		return
 	}
@@ -189,6 +252,13 @@ func testAuth() (accessT string, err error) {
 	if err != nil {
 		return
 	}
+
+	// test getting access token with response_type=token
+	_, err = getTokenResp(ch)
+	if err != nil {
+		return
+	}
+
 
 	// return only the access token for other tests
 	accessT = tResp.AccessToken
