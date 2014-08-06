@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/RangelReale/osin"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"io/ioutil"
@@ -97,6 +98,24 @@ func main() {
 	}
 	defer sess.Close()
 
+	// oauth2 related config
+	osinConf := osin.NewServerConfig()
+	osinConf.AllowGetAccessRequest = true
+	osinConf.AllowClientSecretInParams = true
+	osinConf.AllowedAccessTypes = osin.AllowedAccessType{
+		osin.AUTHORIZATION_CODE,
+		osin.REFRESH_TOKEN,
+	}
+	osinConf.AllowedAuthorizeTypes = osin.AllowedAuthorizeType{
+		osin.CODE,
+		osin.TOKEN,
+	}
+
+	// OAuth2 endpoints handler
+	osinServer := osin.NewServer(osinConf, &oauth2.AuthStorage{
+		Db: sess,
+	})
+
 	// martini
 	m := martini.Classic()
 	m.Use(martini.Recovery())
@@ -117,7 +136,7 @@ func main() {
 	bindUserInterests("/api.v1/userInterests/:user_id", &sess, m)
 
 	// handle OAuth2 endpoints
-	oauth2.Bind("/oauth2", &sess)
+	oauth2.Bind("/oauth2", osinServer)
 
 	// Frontend
 	m.Group("/", func(r martini.Router) {
