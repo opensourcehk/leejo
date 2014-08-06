@@ -1,8 +1,8 @@
 {
-	db: {
-		host: "/var/run/postgresql",
-		name: "database_name",
-		user: "username",
-		pass: "password"
+	"db": {
+		"host": "/var/run/postgresql",
+		"name": "database_name",
+		"user": "username",
+		"pass": "password"
 	}
 }
