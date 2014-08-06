@@ -22,3 +22,35 @@ create table leejo_user_interest (
   interest_name varchar(255) not null default '',
   primary key (user_interest_id)
 );
+
+create table leejo_api_client (
+  id varchar(255) default '',
+  secret varchar(255) default '',
+  redirect_uri varchar(255) default '',
+  primary key (id)
+);
+
+create table leejo_api_authdata (
+  id serial,
+  code varchar(255) default '' unique,
+  user_id integer default 0,
+  client_id varchar(255) default '',
+  scope varchar(255) default '',
+  state varchar(255) default '',
+  redirect_uri varchar(255) default '',
+  expired_timestamp integer,
+  created_timestamp integer,
+  primary key (id)
+);
+
+create table leejo_api_access (
+  id serial,
+  access_token varchar(255) default '' unique,
+  refresh_token varchar(255) default '' unique,
+  client_id varchar(255) default '',
+  user_id integer default 0,
+  scope varchar(255) default '',
+  expired_timestamp integer,
+  created_timestamp integer,
+  primary key (id)
+);

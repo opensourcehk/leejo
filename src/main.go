@@ -1,10 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
+	"github.com/RangelReale/osin"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
+	"io/ioutil"
 	"net/http"
+	"oauth2"
+	"os"
 	"regexp"
 	"strings"
 	"upper.io/db"
@@ -49,27 +55,66 @@ func MapEncoder(c martini.Context, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type config struct {
+	Db dbconfig `json:"db"`
+}
+
+type dbconfig struct {
+	Host string `json:"host"`
+	Name string `json:"name"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
+}
+
 func main() {
 
 	// parse flags
-	dbhost := flag.String("dbhost", "localhost", "Hostname of the database")
-	dbname := flag.String("dbname", "", "Name of the database")
-	dbuser := flag.String("dbuser", "", "Name of the database user")
-	dbpass := flag.String("dbpass", "", "Password of the database user")
+	confFn := flag.String("config", "config.json", "Path to config file")
 	flag.Parse()
+
+	// read the config file to conf
+	confFile, err := ioutil.ReadFile(*confFn)
+	if err != nil {
+		fmt.Printf("Failed opening config file \"%s\": %v\n", *confFn, err)
+		os.Exit(1)
+	}
+	conf := config{}
+	err = json.Unmarshal(confFile, &conf)
+	if err != nil {
+		fmt.Printf("Failed parsing config file \"%s\": %v\n", *confFn, err)
+		os.Exit(1)
+	}
 
 	// connect to database
 	var dbsettings = db.Settings{
-		Host:     *dbhost,
-		Database: *dbname,
-		User:     *dbuser,
-		Password: *dbpass,
+		Host:     conf.Db.Host,
+		Database: conf.Db.Name,
+		User:     conf.Db.User,
+		Password: conf.Db.Pass,
 	}
 	sess, err := db.Open(postgresql.Adapter, dbsettings)
 	if err != nil {
 		panic(err)
 	}
 	defer sess.Close()
+
+	// oauth2 related config
+	osinConf := osin.NewServerConfig()
+	osinConf.AllowGetAccessRequest = true
+	osinConf.AllowClientSecretInParams = true
+	osinConf.AllowedAccessTypes = osin.AllowedAccessType{
+		osin.AUTHORIZATION_CODE,
+		osin.REFRESH_TOKEN,
+	}
+	osinConf.AllowedAuthorizeTypes = osin.AllowedAuthorizeType{
+		osin.CODE,
+		osin.TOKEN,
+	}
+
+	// OAuth2 endpoints handler
+	osinServer := osin.NewServer(osinConf, &oauth2.AuthStorage{
+		Db: sess,
+	})
 
 	// martini
 	m := martini.Classic()
@@ -82,13 +127,16 @@ func main() {
 	m.Use(MapEncoder)
 
 	// Users related API
-	bindUser("/api.v1/users", &sess, m)
+	bindUser("/api.v1/users", osinServer, &sess, m)
 
 	// UserSkills related API
-	bindUserSkills("/api.v1/userSkills/:user_id", &sess, m)
+	bindUserSkills("/api.v1/userSkills/:user_id", osinServer, &sess, m)
 
 	// UserInterests related API
-	bindUserInterests("/api.v1/userInterests/:user_id", &sess, m)
+	bindUserInterests("/api.v1/userInterests/:user_id", osinServer, &sess, m)
+
+	// handle OAuth2 endpoints
+	oauth2.Bind("/oauth2", osinServer)
 
 	// Frontend
 	m.Group("/", func(r martini.Router) {

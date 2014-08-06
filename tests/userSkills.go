@@ -1,13 +1,14 @@
 package main
 
 import (
+	"data"
 	"fmt"
 	"github.com/yookoala/restit"
 )
 
 type SkillResp struct {
-	Status string      `json:"status"`
-	Result []UserSkill `json:"result"`
+	Status string           `json:"status"`
+	Result []data.UserSkill `json:"result"`
 }
 
 func (r *SkillResp) Count() int {
@@ -57,8 +58,8 @@ func (r *SkillResp) GetNth(n int) (o interface{}, err error) {
 func (r *SkillResp) Match(a interface{}, b interface{}) (err error) {
 
 	// check if the item match the payload
-	ptr_a := a.(*UserSkill)
-	ptr_b := b.(*UserSkill)
+	ptr_a := a.(*data.UserSkill)
+	ptr_b := b.(*data.UserSkill)
 	if ptr_a.UserId != ptr_b.UserId {
 		err = fmt.Errorf("UserId not match (\"%d\", \"%d\")",
 			ptr_a.UserId, ptr_b.UserId)
@@ -72,15 +73,15 @@ func (r *SkillResp) Match(a interface{}, b interface{}) (err error) {
 	return
 }
 
-func testUserSkills(userId int64) (err error) {
+func testUserSkills(token string, userId int64) (err error) {
 
 	var resp SkillResp
 
-	toCreate := UserSkill{
+	toCreate := data.UserSkill{
 		UserId:    userId,
 		SkillName: "Dummy Skill", // TODO: use uuid
 	}
-	toUpdate := UserSkill{
+	toUpdate := data.UserSkill{
 		UserId:    userId,
 		SkillName: "Dummy Skill Updated",
 	}

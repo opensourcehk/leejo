@@ -1,4 +1,4 @@
-package main
+package data
 
 type User struct {
 	UserId   int64  `json:"user_id" db:"user_id,omitempty" form:"-"`

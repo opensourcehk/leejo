@@ -1,13 +1,23 @@
 package main
 
 import (
-	"fmt"
+	"log"
 )
 
 func main() {
-	err := testUser()
+
+	// test authentication service
+	token, err := testAuth()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Integration Tests Pass\n")
+
+	// test APIs
+	err = testUser(token)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Printf("Integration Tests Pass\n")
+
 }

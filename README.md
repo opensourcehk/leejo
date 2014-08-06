@@ -47,11 +47,9 @@ Run
 
 To run the server, simply use this command:
 
-    $ leejo_server -dbhost "/var/run/postgresql" \
-      -dbname "your_db_name" -dbuser "your_user" \
-      -dbpass "your_password"
+    $ leejo_server -config "path/to/config.json"
 
-Remember to replace your database name, user and password
+You may reference `data/config.example.json` for the config file format. Remember to replace your database name, user and password
 
 If success, the server should be running at
 http://localhost:8080
@@ -64,12 +62,16 @@ When the server is running, you can test the installation
 by running our integration test. To run, simply run this
 command within the folder this file locates:
 
-    $ make check
+    $ make test
 
 The make script should build and run the integration test
 for you. Please note that the test fails if the leejo
 server process is not running or is not listening to
 localhost:8080.
+
+You must run this test in a Linux environment with a
+proper default browser setting. The test will trigger the
+browser for OAuth2 login.
 
 
 Bug Reports

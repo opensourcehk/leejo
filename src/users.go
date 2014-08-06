@@ -1,13 +1,15 @@
 package main
 
 import (
+	"data"
+	"github.com/RangelReale/osin"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/binding"
 	"net/http"
 	"upper.io/db"
 )
 
-func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
+func bindUser(path string, osinServer *osin.Server, sessPtr *db.Database, m *martini.ClassicMartini) {
 	sess := *sessPtr
 	m.Group(path, func(r martini.Router) {
 		r.Get("", func(params martini.Params, enc Encoder, r *http.Request) []byte {
@@ -18,13 +20,13 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 
 			// retrieve all users
 			res := userCollection.Find()
-			var users []User
+			var users []data.User
 			err = res.All(&users)
 			if err != nil {
 				panic(err)
 			}
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: users,
 			}))
@@ -37,18 +39,18 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 
 			// retrieve all users of id(s)
 			res := userCollection.Find(db.Cond{"user_id": params["id"]})
-			var users []User
+			var users []data.User
 			err = res.All(&users)
 			if err != nil {
 				panic(err)
 			}
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: users,
 			}))
 		})
-		r.Post("", binding.Bind(User{}), func(user User, enc Encoder) []byte {
+		r.Post("", binding.Bind(data.User{}), func(user data.User, enc Encoder) []byte {
 			userCollection, err := sess.Collection("leejo_user")
 			if err != nil {
 				panic(err)
@@ -61,14 +63,14 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 			}
 			user.UserId = userId.(int64)
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
-				Result: []User{user},
+				Result: []data.User{user},
 			}))
 		})
-		r.Put("/:id", binding.Bind(User{}), func(user User, params martini.Params, enc Encoder) []byte {
+		r.Put("/:id", binding.Bind(data.User{}), func(user data.User, params martini.Params, enc Encoder) []byte {
 
-			var users []User
+			var users []data.User
 			userCollection, err := sess.Collection("leejo_user")
 			if err != nil {
 				panic(err)
@@ -89,7 +91,7 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 				panic(err)
 			}
 
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: users,
 			}))
@@ -102,7 +104,7 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 
 			// retrieve all users of id(s)
 			res := userCollection.Find(db.Cond{"user_id": params["id"]})
-			var users []User
+			var users []data.User
 			err = res.All(&users)
 			if err != nil {
 				panic(err)
@@ -112,7 +114,7 @@ func bindUser(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
 
 			// remove all results from database
 			err = res.Remove()
-			return Must(enc.Encode(Resp{
+			return Must(enc.Encode(data.Resp{
 				Status: "OK",
 				Result: users,
 			}))

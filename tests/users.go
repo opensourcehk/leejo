@@ -1,13 +1,14 @@
 package main
 
 import (
+	"data"
 	"fmt"
 	"github.com/yookoala/restit"
 )
 
 type UserResp struct {
-	Status string `json:"status"`
-	Result []User `json:"result"`
+	Status string      `json:"status"`
+	Result []data.User `json:"result"`
 }
 
 func (r *UserResp) Count() int {
@@ -57,8 +58,8 @@ func (r *UserResp) GetNth(n int) (uo interface{}, err error) {
 func (r *UserResp) Match(a interface{}, b interface{}) (err error) {
 
 	// check if the item match the payload
-	ptr_a := a.(*User)
-	ptr_b := b.(*User)
+	ptr_a := a.(*data.User)
+	ptr_b := b.(*data.User)
 	if ptr_a.Username != ptr_b.Username {
 		err = fmt.Errorf("Username not match (\"%s\", \"%s\")",
 			ptr_a.Username, ptr_b.Username)
@@ -72,15 +73,15 @@ func (r *UserResp) Match(a interface{}, b interface{}) (err error) {
 	return
 }
 
-func testUser() (err error) {
+func testUser(token string) (err error) {
 
 	var resp UserResp
 
-	userToCreate := User{
+	userToCreate := data.User{
 		Username: "Tester", // TODO: use uuid
 		Gender:   "F",
 	}
-	userToUpdate := User{
+	userToUpdate := data.User{
 		Username: "Tester Updated",
 		Gender:   "M",
 	}
@@ -116,13 +117,13 @@ func testUser() (err error) {
 
 	// -- Extended Test --
 	// test: userSkill test
-	err = testUserSkills(userId)
+	err = testUserSkills(token, userId)
 	if err != nil {
 		return
 	}
 
 	// test: userInterest test
-	err = testUserInterests(userId)
+	err = testUserInterests(token, userId)
 	if err != nil {
 		return
 	}
