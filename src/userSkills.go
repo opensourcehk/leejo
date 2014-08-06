@@ -2,6 +2,7 @@ package main
 
 import (
 	"data"
+	"github.com/RangelReale/osin"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/binding"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 	"upper.io/db"
 )
 
-func bindUserSkills(path string, sessPtr *db.Database, m *martini.ClassicMartini) {
+func bindUserSkills(path string, osinServer *osin.Server, sessPtr *db.Database, m *martini.ClassicMartini) {
 	sess := *sessPtr
 	m.Group(path, func(r martini.Router) {
 		r.Get("", func(params martini.Params, enc Encoder, r *http.Request) []byte {

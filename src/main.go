@@ -127,13 +127,13 @@ func main() {
 	m.Use(MapEncoder)
 
 	// Users related API
-	bindUser("/api.v1/users", &sess, m)
+	bindUser("/api.v1/users", osinServer, &sess, m)
 
 	// UserSkills related API
-	bindUserSkills("/api.v1/userSkills/:user_id", &sess, m)
+	bindUserSkills("/api.v1/userSkills/:user_id", osinServer, &sess, m)
 
 	// UserInterests related API
-	bindUserInterests("/api.v1/userInterests/:user_id", &sess, m)
+	bindUserInterests("/api.v1/userInterests/:user_id", osinServer, &sess, m)
 
 	// handle OAuth2 endpoints
 	oauth2.Bind("/oauth2", osinServer)
