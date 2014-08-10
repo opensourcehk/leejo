@@ -46,7 +46,7 @@ create table leejo_api_authdata (
 create table leejo_api_access (
   id serial,
   access_token varchar(255) default '' unique,
-  refresh_token varchar(255) default '' unique,
+  refresh_token varchar(255) default '',
   client_id varchar(255) default '',
   user_id integer default 0,
   scope varchar(255) default '',
