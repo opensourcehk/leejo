@@ -2,123 +2,159 @@ package main
 
 import (
 	"data"
+	"encoding/json"
 	"github.com/RangelReale/osin"
-	"github.com/go-martini/martini"
-	"github.com/martini-contrib/binding"
+	"github.com/gorilla/pat"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"upper.io/db"
 )
 
-func bindUser(path string, osinServer *osin.Server, sessPtr *db.Database, m *martini.ClassicMartini) {
+func bindUser(path string, osinServer *osin.Server, sessPtr *db.Database, r *pat.Router) {
 	sess := *sessPtr
-	m.Group(path, func(r martini.Router) {
-		r.Get("", func(params martini.Params, enc Encoder, r *http.Request) []byte {
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
+	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		userCollection, err := sess.Collection("leejo_user")
+		if err != nil {
+			panic(err)
+		}
 
-			// retrieve all users
-			res := userCollection.Find()
-			var users []data.User
-			err = res.All(&users)
-			if err != nil {
-				panic(err)
-			}
+		// retrieve all users
+		res := userCollection.Find()
+		var users []data.User
+		err = res.All(&users)
+		if err != nil {
+			panic(err)
+		}
 
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: users,
-			}))
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: users,
 		})
-		r.Get("/:id", func(params martini.Params, enc Encoder, r *http.Request) []byte {
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
+	})
+	r.Get(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+		userCollection, err := sess.Collection("leejo_user")
+		if err != nil {
+			panic(err)
+		}
 
-			// retrieve all users of id(s)
-			res := userCollection.Find(db.Cond{"user_id": params["id"]})
-			var users []data.User
-			err = res.All(&users)
-			if err != nil {
-				panic(err)
-			}
+		// retrieve all users of id(s)
+		id := r.URL.Query().Get(":id")
+		res := userCollection.Find(db.Cond{"user_id": id})
+		var users []data.User
+		err = res.All(&users)
+		if err != nil {
+			panic(err)
+		}
 
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: users,
-			}))
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: users,
 		})
-		r.Post("", binding.Bind(data.User{}), func(user data.User, enc Encoder) []byte {
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
+	})
+	r.Post(path, func(w http.ResponseWriter, r *http.Request) {
 
-			// add the user to user collection
-			userId, err := userCollection.Append(user)
-			if err != nil {
-				panic(err)
-			}
-			user.UserId = userId.(int64)
+		user := data.User{}
+		bytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading request: ", err)
+			w.WriteHeader(500)
+			return
+		}
 
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: []data.User{user},
-			}))
+		err = json.Unmarshal(bytes, &user)
+		if err != nil {
+			log.Printf("Error JSON Unmarshal: ", err)
+			w.WriteHeader(500)
+			return
+		}
+		log.Printf("Request %#v", user)
+
+		userCollection, err := sess.Collection("leejo_user")
+		if err != nil {
+			panic(err)
+		}
+
+		// add the user to user collection
+		userId, err := userCollection.Append(user)
+		if err != nil {
+			panic(err)
+		}
+		user.UserId = userId.(int64)
+
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: []data.User{user},
 		})
-		r.Put("/:id", binding.Bind(data.User{}), func(user data.User, params martini.Params, enc Encoder) []byte {
+	})
+	r.Put(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 
-			var users []data.User
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
+		user := data.User{}
+		bytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading request: ", err)
+			w.WriteHeader(500)
+			return
+		}
 
-			res := userCollection.Find(db.Cond{"user_id": params["id"]})
+		err = json.Unmarshal(bytes, &user)
+		if err != nil {
+			log.Printf("Error JSON Unmarshal: ", err)
+			w.WriteHeader(500)
+			return
+		}
+		log.Printf("Request %#v", user)
 
-			// update the user
-			err = res.Update(user)
-			if err != nil {
-				panic(err)
-			}
+		var users []data.User
+		userCollection, err := sess.Collection("leejo_user")
+		if err != nil {
+			panic(err)
+		}
 
-			// retrieve the just updated record from database
-			res = userCollection.Find(db.Cond{"user_id": params["id"]})
-			err = res.All(&users)
-			if err != nil {
-				panic(err)
-			}
+		id := r.URL.Query().Get(":id")
+		res := userCollection.Find(db.Cond{"user_id": id})
 
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: users,
-			}))
+		// update the user
+		err = res.Update(user)
+		if err != nil {
+			panic(err)
+		}
+
+		// retrieve the just updated record from database
+		res = userCollection.Find(db.Cond{"user_id": id})
+		err = res.All(&users)
+		if err != nil {
+			panic(err)
+		}
+
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: users,
 		})
-		r.Delete("/:id", func(params martini.Params, enc Encoder) []byte {
-			userCollection, err := sess.Collection("leejo_user")
-			if err != nil {
-				panic(err)
-			}
+	})
+	r.Delete(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+		userCollection, err := sess.Collection("leejo_user")
+		if err != nil {
+			panic(err)
+		}
 
-			// retrieve all users of id(s)
-			res := userCollection.Find(db.Cond{"user_id": params["id"]})
-			var users []data.User
-			err = res.All(&users)
-			if err != nil {
-				panic(err)
-			}
+		// retrieve all users of id(s)
+		id := r.URL.Query().Get(":id")
+		res := userCollection.Find(db.Cond{"user_id": id})
+		var users []data.User
+		err = res.All(&users)
+		if err != nil {
+			panic(err)
+		}
 
-			// TODO: if len(users) == 0, return 404 error
+		// TODO: if len(users) == 0, return 404 error
 
-			// remove all results from database
-			err = res.Remove()
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: users,
-			}))
-
+		// remove all results from database
+		err = res.Remove()
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: users,
 		})
+
 	})
 }

@@ -5,55 +5,14 @@ import (
 	"flag"
 	"fmt"
 	"github.com/RangelReale/osin"
-	"github.com/go-martini/martini"
-	"github.com/martini-contrib/render"
+	"github.com/gorilla/pat"
 	"io/ioutil"
 	"net/http"
 	"oauth2"
 	"os"
-	"regexp"
-	"strings"
 	"upper.io/db"
 	"upper.io/db/postgresql"
 )
-
-// The regex to check for the requested format (allows an optional trailing
-// slash).
-var rxExt = regexp.MustCompile(`(\.(?:xml|text|json))\/?$`)
-
-// Because `panic`s are caught by martini's Recovery handler, it can be used
-// to return server-side errors (500). Some helpful text message should probably
-// be sent, although not the technical error (which is printed in the log).
-func Must(data []byte, err error) []byte {
-	if err != nil {
-		panic(err)
-	}
-	return data
-}
-
-func MapEncoder(c martini.Context, w http.ResponseWriter, r *http.Request) {
-	// Get the format extension
-	matches := rxExt.FindStringSubmatch(r.URL.Path)
-	ft := ".json"
-	if len(matches) > 1 {
-		// Rewrite the URL without the format extension
-		l := len(r.URL.Path) - len(matches[1])
-		if strings.HasSuffix(r.URL.Path, "/") {
-			l--
-		}
-		r.URL.Path = r.URL.Path[:l]
-		ft = matches[1]
-	}
-	// Inject the requested encoder
-	switch ft {
-	case ".xml":
-		c.MapTo(XmlEncoder{}, (*Encoder)(nil))
-		w.Header().Set("Content-Type", "application/xml")
-	default:
-		c.MapTo(JsonEncoder{}, (*Encoder)(nil))
-		w.Header().Set("Content-Type", "application/json")
-	}
-}
 
 type config struct {
 	Db dbconfig `json:"db"`
@@ -116,38 +75,22 @@ func main() {
 		Db: sess,
 	})
 
-	// martini
-	m := martini.Classic()
-	m.Use(martini.Recovery())
-
-	// render html template from template
-	m.Use(render.Renderer())
-
-	// map the MapEncoder middleware
-	m.Use(MapEncoder)
+	// gorilla pat for routing
+	r := pat.New()
 
 	// Users related API
-	bindUser("/api.v1/users", osinServer, &sess, m)
+	bindUser("/api.v1/users", osinServer, &sess, r)
 
 	// UserSkills related API
-	bindUserSkills("/api.v1/userSkills/:user_id", osinServer, &sess, m)
+	bindUserSkills("/api.v1/userSkills/{user_id:[0-9]+}", osinServer, &sess, r)
 
 	// UserInterests related API
-	bindUserInterests("/api.v1/userInterests/:user_id", osinServer, &sess, m)
+	bindUserInterests("/api.v1/userInterests/{user_id:[0-9]+}", osinServer, &sess, r)
 
 	// handle OAuth2 endpoints
 	oauth2.Bind("/oauth2", osinServer)
 
-	// Frontend
-	m.Group("/", func(r martini.Router) {
-		r.Get("", func(r render.Render) {
-			r.HTML(200, "home", map[string]interface{}{
-				"hello": "world",
-			})
-		})
-	})
-
-	http.Handle("/", m)
+	http.Handle("/", r)
 	http.ListenAndServe(":8080", nil)
 
 }

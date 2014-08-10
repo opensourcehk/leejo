@@ -36,14 +36,17 @@ clean:
 # server
 #
 
-bin/leejo_server: martini osin upper-db-pgsql
+bin/leejo_server: pat osin upper-db-pgsql
 	cd src; go build -o ${BIN}/leejo_server
 
-martini: gopath/src/github.com/go-martini/martini gopath/src/github.com/martini-contrib/binding gopath/src/github.com/martini-contrib/render
+pat: gopath/src/github.com/gorilla/pat
 
 osin: gopath/src/github.com/RangelReale/osin
 
 upper-db-pgsql: gopath/src/upper.io/db gopath/src/menteslibres.net/gosexy/to gopath/src/upper.io/db/postgresql gopath/src/github.com/xiam/gopostgresql
+
+gopath/src/github.com/gorilla/pat:
+	go get github.com/gorilla/pat
 
 gopath/src/github.com/go-martini/martini:
 	go get github.com/go-martini/martini

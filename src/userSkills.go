@@ -2,146 +2,186 @@ package main
 
 import (
 	"data"
+	"encoding/json"
 	"github.com/RangelReale/osin"
-	"github.com/go-martini/martini"
-	"github.com/martini-contrib/binding"
+	"github.com/gorilla/pat"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"upper.io/db"
 )
 
-func bindUserSkills(path string, osinServer *osin.Server, sessPtr *db.Database, m *martini.ClassicMartini) {
+func bindUserSkills(path string, osinServer *osin.Server, sessPtr *db.Database, r *pat.Router) {
 	sess := *sessPtr
-	m.Group(path, func(r martini.Router) {
-		r.Get("", func(params martini.Params, enc Encoder, r *http.Request) []byte {
-			userSkillsCol, err := sess.Collection("leejo_user_skill")
-			if err != nil {
-				panic(err)
-			}
+	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		userSkillsCol, err := sess.Collection("leejo_user_skill")
+		if err != nil {
+			panic(err)
+		}
 
-			// retrieve all userSkills of the user_id
-			res := userSkillsCol.Find(db.Cond{
-				"user_id": params["user_id"],
-			})
-			var userSkills []data.UserSkill
-			err = res.All(&userSkills)
-			if err != nil {
-				panic(err)
-			}
-
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: userSkills,
-			}))
+		// retrieve all userSkills of the user_id
+		user_id := r.URL.Query().Get(":user_id")
+		res := userSkillsCol.Find(db.Cond{
+			"user_id": user_id,
 		})
-		r.Get("/:id", func(params martini.Params, enc Encoder, r *http.Request) []byte {
-			userSkillsCol, err := sess.Collection("leejo_user_skill")
-			if err != nil {
-				panic(err)
-			}
+		var userSkills []data.UserSkill
+		err = res.All(&userSkills)
+		if err != nil {
+			panic(err)
+		}
 
-			// retrieve all userSkills of the user_id and id(s)
-			res := userSkillsCol.Find(db.Cond{
-				"user_skill_id": params["id"],
-				"user_id":       params["user_id"],
-			})
-			var userSkills []data.UserSkill
-			err = res.All(&userSkills)
-			if err != nil {
-				panic(err)
-			}
-
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: userSkills,
-			}))
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: userSkills,
 		})
-		r.Post("", binding.Bind(data.UserSkill{}), func(
-			params martini.Params, user data.UserSkill, enc Encoder) []byte {
+	})
+	r.Get(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+		userSkillsCol, err := sess.Collection("leejo_user_skill")
+		if err != nil {
+			panic(err)
+		}
 
-			inputUserId, err := strconv.ParseInt(params["user_id"], 10, 64)
-			if err != nil {
-				panic(err)
-			}
-			user.UserId = inputUserId // force to use URL's user id
-
-			userSkillsCol, err := sess.Collection("leejo_user_skill")
-			if err != nil {
-				panic(err)
-			}
-
-			// add the user to user collection
-			userId, err := userSkillsCol.Append(user)
-			if err != nil {
-				panic(err)
-			}
-			user.UserSkillId = userId.(int64)
-
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: []data.UserSkill{user},
-			}))
+		// retrieve all userSkills of the user_id and id(s)
+		id := r.URL.Query().Get(":id")
+		user_id := r.URL.Query().Get(":user_id")
+		res := userSkillsCol.Find(db.Cond{
+			"user_skill_id": id,
+			"user_id":       user_id,
 		})
-		r.Put("/:id", binding.Bind(data.UserSkill{}), func(user data.UserSkill, params martini.Params, enc Encoder) []byte {
+		var userSkills []data.UserSkill
+		err = res.All(&userSkills)
+		if err != nil {
+			panic(err)
+		}
 
-			var userSkills []data.UserSkill
-			userSkillsCol, err := sess.Collection("leejo_user_skill")
-			if err != nil {
-				panic(err)
-			}
-
-			res := userSkillsCol.Find(db.Cond{
-				"user_skill_id": params["id"],
-				"user_id":       params["user_id"],
-			})
-
-			// update the user
-			err = res.Update(user)
-			if err != nil {
-				panic(err)
-			}
-
-			// retrieve the just updated record from database
-			res = userSkillsCol.Find(db.Cond{
-				"user_skill_id": params["id"],
-				"user_id":       params["user_id"],
-			})
-			err = res.All(&userSkills)
-			if err != nil {
-				panic(err)
-			}
-
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: userSkills,
-			}))
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: userSkills,
 		})
-		r.Delete("/:id", func(params martini.Params, enc Encoder) []byte {
-			userSkillsCol, err := sess.Collection("leejo_user_skill")
-			if err != nil {
-				panic(err)
-			}
+	})
+	r.Post(path, func(w http.ResponseWriter, r *http.Request) {
 
-			// retrieve all userSkills of id(s)
-			res := userSkillsCol.Find(db.Cond{
-				"user_skill_id": params["id"],
-				"user_id":       params["user_id"],
-			})
-			var userSkills []data.UserSkill
-			err = res.All(&userSkills)
-			if err != nil {
-				panic(err)
-			}
+		userSkill := data.UserSkill{}
+		bytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading request: ", err)
+			w.WriteHeader(500)
+			return
+		}
 
-			// TODO: if len(userSkills) == 0, return 404 error
+		err = json.Unmarshal(bytes, &userSkill)
+		if err != nil {
+			log.Printf("Error JSON Unmarshal: ", err)
+			w.WriteHeader(500)
+			return
+		}
+		log.Printf("Request %#v", userSkill)
 
-			// remove all results from database
-			err = res.Remove()
-			return Must(enc.Encode(data.Resp{
-				Status: "OK",
-				Result: userSkills,
-			}))
+		user_id := r.URL.Query().Get(":user_id")
+		inputUserId, err := strconv.ParseInt(user_id, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		userSkill.UserId = inputUserId // force to use URL's user id
 
+		userSkillsCol, err := sess.Collection("leejo_user_skill")
+		if err != nil {
+			panic(err)
+		}
+
+		// add the user to user collection
+		userId, err := userSkillsCol.Append(userSkill)
+		if err != nil {
+			panic(err)
+		}
+		userSkill.UserSkillId = userId.(int64)
+
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: []data.UserSkill{userSkill},
 		})
+	})
+	r.Put(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+
+		userSkill := data.UserSkill{}
+		bytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading request: ", err)
+			w.WriteHeader(500)
+			return
+		}
+
+		err = json.Unmarshal(bytes, &userSkill)
+		if err != nil {
+			log.Printf("Error JSON Unmarshal: ", err)
+			w.WriteHeader(500)
+			return
+		}
+		log.Printf("Request %#v", userSkill)
+
+
+		var userSkills []data.UserSkill
+		userSkillsCol, err := sess.Collection("leejo_user_skill")
+		if err != nil {
+			panic(err)
+		}
+
+		id := r.URL.Query().Get(":id")
+		user_id := r.URL.Query().Get(":user_id")
+		res := userSkillsCol.Find(db.Cond{
+			"user_skill_id": id,
+			"user_id":       user_id,
+		})
+
+		// update the user
+		err = res.Update(userSkill)
+		if err != nil {
+			panic(err)
+		}
+
+		// retrieve the just updated record from database
+		res = userSkillsCol.Find(db.Cond{
+			"user_skill_id": id,
+			"user_id":       user_id,
+		})
+		err = res.All(&userSkills)
+		if err != nil {
+			panic(err)
+		}
+
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: userSkills,
+		})
+	})
+	r.Delete(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+		userSkillsCol, err := sess.Collection("leejo_user_skill")
+		if err != nil {
+			panic(err)
+		}
+
+		// retrieve all userSkills of id(s)
+		id := r.URL.Query().Get(":id")
+		user_id := r.URL.Query().Get(":user_id")
+		res := userSkillsCol.Find(db.Cond{
+			"user_skill_id": id,
+			"user_id":       user_id,
+		})
+		var userSkills []data.UserSkill
+		err = res.All(&userSkills)
+		if err != nil {
+			panic(err)
+		}
+
+		// TODO: if len(userSkills) == 0, return 404 error
+
+		// remove all results from database
+		err = res.Remove()
+		json.NewEncoder(w).Encode(data.Resp{
+			Status: "OK",
+			Result: userSkills,
+		})
+
 	})
 }

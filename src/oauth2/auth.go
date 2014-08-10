@@ -20,6 +20,9 @@ func Bind(authPath string, osinServer *osin.Server) {
 			ar.Authorized = true
 			osinServer.FinishAuthorizeRequest(resp, r, ar)
 		}
+		if resp.InternalError != nil {
+			log.Printf("Internal Error: %s", resp.InternalError.Error())
+		}
 		log.Printf("OAuth2 Authorize Response: %#v", resp)
 		osin.OutputJSON(resp, w, r)
 	})
