@@ -87,7 +87,7 @@ func RestOnPat(path string, h PatRestHelper, r *pat.Router) {
 			w.WriteHeader(500)
 			return
 		}
-		log.Printf("Request %#v", e)
+		log.Printf("Create %#v", e)
 
 		err = s.Create(c, e)
 		if err != nil {
@@ -117,7 +117,7 @@ func RestOnPat(path string, h PatRestHelper, r *pat.Router) {
 			w.WriteHeader(500)
 			return
 		}
-		log.Printf("Request %#v", e)
+		log.Printf("Update %#v with %#v", c, e)
 
 		s.Update(c, e)
 
