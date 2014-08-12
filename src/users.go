@@ -1,11 +1,11 @@
 package main
 
 import (
-	"data"
 	"encoding/json"
 	"github.com/RangelReale/osin"
 	"github.com/gorilla/pat"
 	"io/ioutil"
+	"leejo/data"
 	"log"
 	"net/http"
 	"upper.io/db"

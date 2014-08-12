@@ -1,9 +1,9 @@
 package main
 
 import (
-	"data"
 	"fmt"
 	"github.com/yookoala/restit"
+	"leejo/data"
 )
 
 type SkillResp struct {

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"data"
 	"encoding/json"
 	"github.com/RangelReale/osin"
 	"github.com/gorilla/pat"
 	"io/ioutil"
+	"leejo/data"
 	"log"
 	"net/http"
 	"strconv"
@@ -36,7 +36,7 @@ func bindUserSkills(path string, osinServer *osin.Server, sessPtr *db.Database, 
 			Result: userSkills,
 		})
 	})
-	r.Get(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	r.Get(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		userSkillsCol, err := sess.Collection("leejo_user_skill")
 		if err != nil {
 			panic(err)
@@ -102,7 +102,7 @@ func bindUserSkills(path string, osinServer *osin.Server, sessPtr *db.Database, 
 			Result: []data.UserSkill{userSkill},
 		})
 	})
-	r.Put(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	r.Put(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 
 		userSkill := data.UserSkill{}
 		bytes, err := ioutil.ReadAll(r.Body)
@@ -119,7 +119,6 @@ func bindUserSkills(path string, osinServer *osin.Server, sessPtr *db.Database, 
 			return
 		}
 		log.Printf("Request %#v", userSkill)
-
 
 		var userSkills []data.UserSkill
 		userSkillsCol, err := sess.Collection("leejo_user_skill")
@@ -155,7 +154,7 @@ func bindUserSkills(path string, osinServer *osin.Server, sessPtr *db.Database, 
 			Result: userSkills,
 		})
 	})
-	r.Delete(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	r.Delete(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		userSkillsCol, err := sess.Collection("leejo_user_skill")
 		if err != nil {
 			panic(err)

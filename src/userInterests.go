@@ -1,11 +1,11 @@
 package main
 
 import (
-	"data"
 	"encoding/json"
 	"github.com/RangelReale/osin"
 	"github.com/gorilla/pat"
 	"io/ioutil"
+	"leejo/data"
 	"log"
 	"net/http"
 	"strconv"
@@ -36,7 +36,7 @@ func bindUserInterests(path string, osinServer *osin.Server, sessPtr *db.Databas
 			Result: userInterests,
 		})
 	})
-	r.Get(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	r.Get(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		userInterestsCol, err := sess.Collection("leejo_user_interest")
 		if err != nil {
 			panic(err)
@@ -47,7 +47,7 @@ func bindUserInterests(path string, osinServer *osin.Server, sessPtr *db.Databas
 		user_id := r.URL.Query().Get(":user_id")
 		res := userInterestsCol.Find(db.Cond{
 			"user_interest_id": id,
-			"user_id":       user_id,
+			"user_id":          user_id,
 		})
 		var userInterests []data.UserInterest
 		err = res.All(&userInterests)
@@ -102,7 +102,7 @@ func bindUserInterests(path string, osinServer *osin.Server, sessPtr *db.Databas
 			Result: []data.UserInterest{userInterest},
 		})
 	})
-	r.Put(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	r.Put(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 
 		userInterest := data.UserInterest{}
 		bytes, err := ioutil.ReadAll(r.Body)
@@ -120,7 +120,6 @@ func bindUserInterests(path string, osinServer *osin.Server, sessPtr *db.Databas
 		}
 		log.Printf("Request %#v", userInterest)
 
-
 		var userInterests []data.UserInterest
 		userInterestsCol, err := sess.Collection("leejo_user_interest")
 		if err != nil {
@@ -131,7 +130,7 @@ func bindUserInterests(path string, osinServer *osin.Server, sessPtr *db.Databas
 		user_id := r.URL.Query().Get(":user_id")
 		res := userInterestsCol.Find(db.Cond{
 			"user_interest_id": id,
-			"user_id":       user_id,
+			"user_id":          user_id,
 		})
 
 		// update the user
@@ -143,7 +142,7 @@ func bindUserInterests(path string, osinServer *osin.Server, sessPtr *db.Databas
 		// retrieve the just updated record from database
 		res = userInterestsCol.Find(db.Cond{
 			"user_interest_id": id,
-			"user_id":       user_id,
+			"user_id":          user_id,
 		})
 		err = res.All(&userInterests)
 		if err != nil {
@@ -155,7 +154,7 @@ func bindUserInterests(path string, osinServer *osin.Server, sessPtr *db.Databas
 			Result: userInterests,
 		})
 	})
-	r.Delete(path + "/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	r.Delete(path+"/{id:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		userInterestsCol, err := sess.Collection("leejo_user_interest")
 		if err != nil {
 			panic(err)
@@ -166,7 +165,7 @@ func bindUserInterests(path string, osinServer *osin.Server, sessPtr *db.Databas
 		user_id := r.URL.Query().Get(":user_id")
 		res := userInterestsCol.Find(db.Cond{
 			"user_interest_id": id,
-			"user_id":       user_id,
+			"user_id":          user_id,
 		})
 		var userInterests []data.UserInterest
 		err = res.All(&userInterests)
