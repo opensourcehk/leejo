@@ -28,20 +28,31 @@ func (c *BasicListCond) GetOffset() uint64 {
 	return c.Offset
 }
 
-// pointer to key
-type KeyPtr interface{}
-
-// pointer to parent key
-type ParentKeyPtr interface{}
-
 // pointer to condition
 type CondPtr interface{}
 
 // struct to store context keys
-type Context struct {
-	Key       KeyPtr
-	ParentKey ParentKeyPtr
-	Cond      ListCond
+type Context interface {
+	Get(string) string
+	GetCond() ListCond
+}
+
+// basic implementation of context
+type BasicContext struct {
+	Values Values
+	Cond   ListCond
+}
+
+func (c *BasicContext) Get(key string) string {
+	return c.Values.Get(key)
+}
+func (c *BasicContext) GetCond() ListCond {
+	return c.Cond
+}
+
+// values in a context
+type Values interface {
+	Get(string) string
 }
 
 // service interface

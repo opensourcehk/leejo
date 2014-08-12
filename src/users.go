@@ -33,7 +33,7 @@ func (h *UserRest) Service(r *http.Request) service.Service {
 			return
 		},
 		KeyCondFunc: func(c service.Context) db.Cond {
-			return db.Cond{"user_id": c.Key}
+			return db.Cond{"user_id": c.Get(":id")}
 		},
 		ParentCondFunc: func(c service.Context) db.Cond {
 			return db.Cond{}
@@ -43,9 +43,8 @@ func (h *UserRest) Service(r *http.Request) service.Service {
 
 // translate an http request into a query context
 func (h *UserRest) Context(r *http.Request) service.Context {
-	return service.Context{
-		Key:       r.URL.Query().Get(":id"),
-		ParentKey: nil,
+	return &service.BasicContext{
+		Values: r.URL.Query(),
 		Cond: &service.BasicListCond{
 			Limit:  20,
 			Offset: 0,
