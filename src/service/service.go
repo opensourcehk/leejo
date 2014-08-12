@@ -37,11 +37,18 @@ type ParentKeyPtr interface{}
 // pointer to condition
 type CondPtr interface{}
 
+// struct to store context keys
+type Context struct {
+	Key       KeyPtr
+	ParentKey ParentKeyPtr
+	Cond      ListCond
+}
+
 // service interface
 type Service interface {
-	Create(EntityPtr) error
-	List(ParentKeyPtr, ListCond, EntityListPtr) error
-	Retrieve(KeyPtr, EntityListPtr) error
-	Update(KeyPtr, EntityPtr) error
-	Delete(KeyPtr) error
+	Create(Context, EntityPtr) error
+	List(Context, EntityListPtr) error
+	Retrieve(Context, EntityListPtr) error
+	Update(Context, EntityPtr) error
+	Delete(Context) error
 }
