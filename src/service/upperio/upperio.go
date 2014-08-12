@@ -14,7 +14,7 @@ type Id interface{}
 type Service struct {
 	Db             db.Database
 	CollName       string
-	ApplyIdFunc    func(Id, service.EntityPtr) (err error)
+	IdSetterFunc    func(Id, service.EntityPtr) (err error)
 	KeyCondFunc    func(service.KeyPtr) db.Cond
 	ParentCondFunc func(service.ParentKeyPtr) db.Cond
 }
@@ -22,8 +22,8 @@ type Service struct {
 // upperio specific method
 // apply id to the just created entity
 // used in Create method
-func (s *Service) ApplyId(id Id, e service.EntityPtr) (err error) {
-	return s.ApplyIdFunc(id, e)
+func (s *Service) SetId(id Id, e service.EntityPtr) (err error) {
+	return s.IdSetterFunc(id, e)
 }
 
 // upperio specific method
@@ -54,7 +54,7 @@ func (s *Service) Create(c service.Context, e service.EntityPtr) (err error) {
 	}
 
 	// apply the serial key to the
-	err = s.ApplyId(id, e)
+	err = s.SetId(id, e)
 	return
 }
 

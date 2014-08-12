@@ -27,7 +27,7 @@ func (h *UserRest) Service(r *http.Request) service.Service {
 	return &upperio.Service{
 		Db:       h.Db,
 		CollName: "leejo_user",
-		ApplyIdFunc: func(id upperio.Id, e service.EntityPtr) (err error) {
+		IdSetterFunc: func(id upperio.Id, e service.EntityPtr) (err error) {
 			u := e.(*data.User)
 			u.UserId = id.(int64)
 			return
