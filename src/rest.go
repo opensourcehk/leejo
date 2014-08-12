@@ -18,7 +18,7 @@ type PatRestHelper interface {
 	// of an individual entity
 	SubPath() string
 
-	// allocate storage service for CURD
+	// allocate storage service for CURD operations
 	Service(r *http.Request) service.Service
 
 	// translate an http request into a query context

@@ -1,4 +1,4 @@
-package main
+package upperio
 
 import (
 	"leejo/service"
@@ -6,31 +6,42 @@ import (
 )
 
 // receives the serial / id from upper.io
-type EntityId interface{}
+// used in Append operations
+type Id interface{}
 
 // Generic upper.io CURD service
 // Implements Service interface in leejo/service
-type UpperIoService struct {
+type Service struct {
 	Db             db.Database
 	CollName       string
-	ApplyIdFunc    func(EntityId, service.EntityPtr) (err error)
+	ApplyIdFunc    func(Id, service.EntityPtr) (err error)
 	KeyCondFunc    func(service.KeyPtr) db.Cond
 	ParentCondFunc func(service.ParentKeyPtr) db.Cond
 }
 
-func (s *UpperIoService) ApplyId(id EntityId, e service.EntityPtr) (err error) {
+// upperio specific method
+// apply id to the just created entity
+// used in Create method
+func (s *Service) ApplyId(id Id, e service.EntityPtr) (err error) {
 	return s.ApplyIdFunc(id, e)
 }
 
-func (s *UpperIoService) KeyCond(k service.KeyPtr) db.Cond {
+// upperio specific method
+// translate key into upper.io condition
+// used in Retrieve method
+func (s *Service) KeyCond(k service.KeyPtr) db.Cond {
 	return s.KeyCondFunc(k)
 }
 
-func (s *UpperIoService) ParentCond(pk service.ParentKeyPtr) db.Cond {
+// upperio specific method
+// translate parent key into upper.io condition
+// used in List method
+func (s *Service) ParentCond(pk service.ParentKeyPtr) db.Cond {
 	return s.ParentCondFunc(pk)
 }
 
-func (s *UpperIoService) Create(c service.Context, e service.EntityPtr) (err error) {
+// implements Create method of Service
+func (s *Service) Create(c service.Context, e service.EntityPtr) (err error) {
 	coll, err := s.Db.Collection(s.CollName)
 	if err != nil {
 		return
@@ -47,7 +58,8 @@ func (s *UpperIoService) Create(c service.Context, e service.EntityPtr) (err err
 	return
 }
 
-func (s *UpperIoService) List(c service.Context, el service.EntityListPtr) (err error) {
+// implements List method of Service
+func (s *Service) List(c service.Context, el service.EntityListPtr) (err error) {
 
 	coll, err := s.Db.Collection(s.CollName)
 	if err != nil {
@@ -61,7 +73,8 @@ func (s *UpperIoService) List(c service.Context, el service.EntityListPtr) (err 
 	return
 }
 
-func (s *UpperIoService) Retrieve(c service.Context, el service.EntityListPtr) (err error) {
+// implements Retrieve method of Service
+func (s *Service) Retrieve(c service.Context, el service.EntityListPtr) (err error) {
 	coll, err := s.Db.Collection(s.CollName)
 	if err != nil {
 		return
@@ -73,7 +86,8 @@ func (s *UpperIoService) Retrieve(c service.Context, el service.EntityListPtr) (
 	return
 }
 
-func (s *UpperIoService) Update(c service.Context, e service.EntityPtr) (err error) {
+// implements Update method of Service
+func (s *Service) Update(c service.Context, e service.EntityPtr) (err error) {
 	coll, err := s.Db.Collection(s.CollName)
 	if err != nil {
 		return
@@ -86,7 +100,8 @@ func (s *UpperIoService) Update(c service.Context, e service.EntityPtr) (err err
 	return
 }
 
-func (s *UpperIoService) Delete(c service.Context) (err error) {
+// implements Delete method of Service
+func (s *Service) Delete(c service.Context) (err error) {
 	coll, err := s.Db.Collection(s.CollName)
 	if err != nil {
 		return

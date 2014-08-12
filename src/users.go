@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/pat"
 	"leejo/data"
 	"leejo/service"
+	"leejo/service/upperio"
 	"net/http"
 	"upper.io/db"
 )
@@ -19,13 +20,14 @@ func (h *UserRest) SubPath() string {
 	return "{id:[0-9]+}"
 }
 
+// allocate storage service for CURD operations of user
 func (h *UserRest) Service(r *http.Request) service.Service {
 	// the content of service would be database specific
 	// but the interface of service would be generic
-	return &UpperIoService{
+	return &upperio.Service{
 		Db:       h.Db,
 		CollName: "leejo_user",
-		ApplyIdFunc: func(id EntityId, e service.EntityPtr) (err error) {
+		ApplyIdFunc: func(id upperio.Id, e service.EntityPtr) (err error) {
 			u := e.(*data.User)
 			u.UserId = id.(int64)
 			return
