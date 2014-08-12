@@ -36,10 +36,12 @@ clean:
 # server
 #
 
-bin/leejo_server: pat osin upper-db-pgsql
+bin/leejo_server: pat gourd-service osin upper-db-pgsql
 	cd src; go build -o ${BIN}/leejo_server
 
 pat: gopath/src/github.com/gorilla/pat
+
+gourd-service: gopath/src/github.com/gourd/service
 
 osin: gopath/src/github.com/RangelReale/osin
 
@@ -47,6 +49,9 @@ upper-db-pgsql: gopath/src/upper.io/db gopath/src/menteslibres.net/gosexy/to gop
 
 gopath/src/github.com/gorilla/pat:
 	go get github.com/gorilla/pat
+
+gopath/src/github.com/gourd/service:
+	go get github.com/gourd/service
 
 gopath/src/github.com/go-martini/martini:
 	go get github.com/go-martini/martini

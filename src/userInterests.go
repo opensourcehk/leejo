@@ -3,9 +3,9 @@ package main
 import (
 	"github.com/RangelReale/osin"
 	"github.com/gorilla/pat"
+	"github.com/gourd/service"
+	"github.com/gourd/service/upperio"
 	"leejo/data"
-	"leejo/service"
-	"leejo/service/upperio"
 	"net/http"
 	"upper.io/db"
 )
