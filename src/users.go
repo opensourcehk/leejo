@@ -32,10 +32,10 @@ func (h *UserRest) Service(r *http.Request) service.Service {
 			u.UserId = id.(int64)
 			return
 		},
-		KeyCondFunc: func(k service.KeyPtr) db.Cond {
-			return db.Cond{"user_id": k}
+		KeyCondFunc: func(c service.Context) db.Cond {
+			return db.Cond{"user_id": c.Key}
 		},
-		ParentCondFunc: func(pk service.ParentKeyPtr) db.Cond {
+		ParentCondFunc: func(c service.Context) db.Cond {
 			return db.Cond{}
 		},
 	}

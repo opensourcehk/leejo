@@ -14,9 +14,9 @@ type Id interface{}
 type Service struct {
 	Db             db.Database
 	CollName       string
-	IdSetterFunc    func(Id, service.EntityPtr) (err error)
-	KeyCondFunc    func(service.KeyPtr) db.Cond
-	ParentCondFunc func(service.ParentKeyPtr) db.Cond
+	IdSetterFunc   func(Id, service.EntityPtr) (err error)
+	KeyCondFunc    func(service.Context) db.Cond
+	ParentCondFunc func(service.Context) db.Cond
 }
 
 // upperio specific method
@@ -29,15 +29,15 @@ func (s *Service) SetId(id Id, e service.EntityPtr) (err error) {
 // upperio specific method
 // translate key into upper.io condition
 // used in Retrieve method
-func (s *Service) KeyCond(k service.KeyPtr) db.Cond {
-	return s.KeyCondFunc(k)
+func (s *Service) KeyCond(c service.Context) db.Cond {
+	return s.KeyCondFunc(c)
 }
 
 // upperio specific method
 // translate parent key into upper.io condition
 // used in List method
-func (s *Service) ParentCond(pk service.ParentKeyPtr) db.Cond {
-	return s.ParentCondFunc(pk)
+func (s *Service) ParentCond(c service.Context) db.Cond {
+	return s.ParentCondFunc(c)
 }
 
 // implements Create method of Service
@@ -67,7 +67,7 @@ func (s *Service) List(c service.Context, el service.EntityListPtr) (err error) 
 	}
 
 	// retrieve all users
-	res := coll.Find(s.ParentCond(c.ParentKey))
+	res := coll.Find(s.ParentCond(c))
 	// TODO: also work with c.Cond for ListCond (limit and offset)
 	err = res.All(el)
 	return
@@ -81,7 +81,7 @@ func (s *Service) Retrieve(c service.Context, el service.EntityListPtr) (err err
 	}
 
 	// retrieve all users of id(s)
-	res := coll.Find(s.KeyCond(c.Key))
+	res := coll.Find(s.KeyCond(c))
 	err = res.All(el)
 	return
 }
@@ -93,7 +93,7 @@ func (s *Service) Update(c service.Context, e service.EntityPtr) (err error) {
 		return
 	}
 
-	res := coll.Find(s.KeyCond(c.Key))
+	res := coll.Find(s.KeyCond(c))
 
 	// update the user
 	err = res.Update(e)
@@ -107,7 +107,7 @@ func (s *Service) Delete(c service.Context) (err error) {
 		return
 	}
 
-	res := coll.Find(s.KeyCond(c.Key))
+	res := coll.Find(s.KeyCond(c))
 	if err != nil {
 		return
 	}
