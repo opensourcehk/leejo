@@ -32,6 +32,10 @@ func (h *UserSkillRest) Service(r *http.Request) service.Service {
 			u.UserSkillId = id.(int64)
 			return
 		},
+		CountFunc: func(el service.EntityListPtr) uint64 {
+			l := el.(*[]data.UserSkill)
+			return uint64(len(*l))
+		},
 		KeyCondFunc: func(c service.Context) db.Cond {
 			return db.Cond{
 				"user_id":       c.Get(":user_id"),
