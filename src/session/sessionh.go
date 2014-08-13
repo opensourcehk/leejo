@@ -11,13 +11,16 @@ type SessionHandler interface {
 	Session(r *http.Request) (Session, error)
 }
 
-// implementat of a session handler
+// implementation of a session handler
 // that would fetch osin for authentication backend
 type OsinSessionHandler struct {
-	Server *osin.Server
+	Storage osin.Storage
 }
 
 func (h *OsinSessionHandler) Session(r *http.Request) (s Session, err error) {
+	auth := r.Header.Get("Authorization")
+	_ = auth
+
 	s = &BasicSession{
 		Request: r,
 	}

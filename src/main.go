@@ -72,9 +72,10 @@ func main() {
 	}
 
 	// OAuth2 endpoints handler
-	osinServer := osin.NewServer(osinConf, &oauth2.AuthStorage{
+	osinStorage := &oauth2.AuthStorage{
 		Db: sess,
-	})
+	}
+	osinServer := osin.NewServer(osinConf, osinStorage)
 
 	// gorilla pat for routing
 	r := pat.New()
@@ -82,7 +83,7 @@ func main() {
 	// define session handler
 	// that works with a osin server
 	sh := &session.OsinSessionHandler{
-		Server: osinServer,
+		Storage: osinStorage,
 	}
 
 	// Users related API
