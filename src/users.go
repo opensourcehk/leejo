@@ -17,6 +17,12 @@ type UserRest struct {
 	subPath  string
 }
 
+// return the scope requires for
+// a certain kind of access type
+func (h *UserRest) ScopeOf(access string) string {
+	return "user"
+}
+
 // path which only include contextual information
 // e.g. /api/user/123/emails
 func (h *UserRest) BasePath() string {

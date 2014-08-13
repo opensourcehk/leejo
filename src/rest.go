@@ -14,6 +14,10 @@ import (
 // a REST CURD interface
 type PatRestHelper interface {
 
+	// returns the scope required for a certain
+	// kind of access to this object
+	ScopeOf(string) string
+
 	// returns a pat readable regular expression
 	// to listing endpoint
 	BasePath() string
