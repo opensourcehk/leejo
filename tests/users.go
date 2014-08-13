@@ -88,6 +88,11 @@ func testUser(token string) (err error) {
 
 	test := restit.Rest("User", "http://localhost:8080/api.v1/users")
 
+	// -- Test Create without proper token --
+	test.Create(&userToCreate).
+		ExpectStatus(403).
+		RunOrPanic()
+
 	// -- Test Create --
 	test.Create(&userToCreate).
 		WithResponseAs(&resp).

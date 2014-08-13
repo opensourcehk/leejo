@@ -98,7 +98,7 @@ func getAuthCodeResp(ch chan chanResp) (code string, err error) {
 	params := url.Values{}
 	params.Set("response_type", "code")
 	params.Set("client_id", "testing")
-	params.Set("scope", "usersInfo")
+	params.Set("scope", "user,user_skills,user_interests")
 	params.Set("redirect_uri", "http://localhost:8000/redirect/authcode/")
 	open.Start("http://localhost:8080/oauth2/authorize?" + params.Encode())
 
@@ -137,7 +137,7 @@ func getTokenResp(ch chan chanResp) (tResp tokenResp, err error) {
 	params := url.Values{}
 	params.Set("response_type", "token")
 	params.Set("client_id", "testing")
-	params.Set("scope", "usersInfo")
+	params.Set("scope", "user,user_skills,user_interests")
 	params.Set("redirect_uri", "http://localhost:8000/redirect/token/")
 	open.Start("http://localhost:8080/oauth2/authorize?" + params.Encode())
 
