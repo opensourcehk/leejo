@@ -52,11 +52,11 @@ func main() {
 		User:     conf.Db.User,
 		Password: conf.Db.Pass,
 	}
-	sess, err := db.Open(postgresql.Adapter, dbsettings)
+	dbs, err := db.Open(postgresql.Adapter, dbsettings)
 	if err != nil {
 		panic(err)
 	}
-	defer sess.Close()
+	defer dbs.Close()
 
 	// oauth2 related config
 	osinConf := osin.NewServerConfig()
@@ -73,7 +73,7 @@ func main() {
 
 	// OAuth2 endpoints handler
 	osinStorage := &oauth2.AuthStorage{
-		Db: sess,
+		Db: dbs,
 	}
 	osinServer := osin.NewServer(osinConf, osinStorage)
 
@@ -87,13 +87,13 @@ func main() {
 	}
 
 	// Users related API
-	bindUser("/api.v1/users", sh, sess, r)
+	bindUser("/api.v1/users", sh, dbs, r)
 
 	// UserSkills related API
-	bindUserSkills("/api.v1/userSkills/{user_id:[0-9]+}", sh, sess, r)
+	bindUserSkills("/api.v1/userSkills/{user_id:[0-9]+}", sh, dbs, r)
 
 	// UserInterests related API
-	bindUserInterests("/api.v1/userInterests/{user_id:[0-9]+}", sh, sess, r)
+	bindUserInterests("/api.v1/userInterests/{user_id:[0-9]+}", sh, dbs, r)
 
 	// handle OAuth2 endpoints
 	oauth2.Bind("/oauth2", osinServer)
