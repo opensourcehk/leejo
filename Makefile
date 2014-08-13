@@ -7,15 +7,18 @@ export BIN=${ROOT}/bin
 # main targets
 #
 
-all: build
+all: check build
 
 serve: build
+	@echo "Serve"
+	@echo "====="
 	./bin/leejo_server -config ./data/config.json
 
-build: fmt bin/leejo_server
+build: fmt bin/leejo_server bin/integration_test
 
 test: fmt bin/integration_test
 	@echo "Integration Test"
+	@echo "================"
 	@bin/integration_test
 	@echo
 
@@ -49,8 +52,11 @@ clean:
 #
 
 bin/leejo_server: pat gourd-service osin upper-db-pgsql
+	@echo "Build Server"
+	@echo "============"
 	cd src; go test -i
 	cd src; go build -o ${BIN}/leejo_server
+	@echo
 
 pat: gopath/src/github.com/gorilla/pat
 
@@ -90,7 +96,7 @@ gopath/src/upper.io/db/postgresql:
 gopath/src/github.com/RangelReale/osin:
 	go get github.com/RangelReale/osin
 
-.PHONY: martini osin upper-db-pgsql
+.PHONY: pat gourd-service osin upper-db-pgsql
 
 
 #
@@ -101,7 +107,10 @@ bin/integration_test: \
 	gopath/src/github.com/jmcvetta/napping \
 	gopath/src/github.com/yookoala/restit \
 	gopath/src/github.com/skratchdot/open-golang/open
+	@echo "Build Integration Test"
+	@echo "======================"
 	cd tests; go build -o ${BIN}/integration_test
+	@echo
 
 gopath/src/github.com/yookoala/restit:
 	go get github.com/yookoala/restit
@@ -111,3 +120,5 @@ gopath/src/github.com/jmcvetta/napping:
 
 gopath/src/github.com/skratchdot/open-golang/open:
 	go get github.com/skratchdot/open-golang/open
+
+.PHONY: bin/integration_test
