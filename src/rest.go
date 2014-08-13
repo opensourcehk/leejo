@@ -14,9 +14,9 @@ import (
 // a REST CURD interface
 type PatRestHelper interface {
 
-	// returns the scope required for a certain
-	// kind of access to this object
-	ScopeOf(string) string
+	// check if the session allow
+	// the kind of access to this object
+	CheckAccess(string, SessionHandler, interface{}) error
 
 	// returns a pat readable regular expression
 	// to listing endpoint
@@ -49,9 +49,16 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		s := h.Service(r)
 		el := h.EntityList()
 		c := h.Context(r)
+		var err error
 
 		// retrieve all of entities in context c
-		err := s.Retrieve(c.GetKey(), c.GetParentKey(), el)
+		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
+		if err != nil {
+			panic(err)
+		}
+
+		// check access
+		err = h.CheckAccess("retrieve", sh, el)
 		if err != nil {
 			panic(err)
 		}
@@ -65,9 +72,16 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		s := h.Service(r)
 		el := h.EntityList()
 		c := h.Context(r)
+		var err error
+
+		// check access
+		err = h.CheckAccess("list", sh, c.GetParentKey())
+		if err != nil {
+			panic(err)
+		}
 
 		// dummy limit and offset for now
-		err := s.List(c.GetKey(), el)
+		err = s.List(c.GetKey(), el)
 		if err != nil {
 			panic(err)
 		}
@@ -81,6 +95,7 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		s := h.Service(r)
 		e := h.Entity()
 		c := h.Context(r)
+		var err error
 
 		// TODO: find a way to enforce parent key
 
@@ -99,6 +114,12 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		}
 		log.Printf("Create %#v", e)
 
+		// check access
+		err = h.CheckAccess("create", sh, nil)
+		if err != nil {
+			panic(err)
+		}
+
 		err = s.Create(c, e)
 		if err != nil {
 			panic(err)
@@ -112,7 +133,9 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 	r.Put(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 		s := h.Service(r)
 		e := h.Entity()
+		el := h.EntityList()
 		c := h.Context(r)
+		var err error
 
 		bytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -129,6 +152,18 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		}
 		log.Printf("Update %#v with %#v", c, e)
 
+		// retrieve all entities with c.Key
+		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
+		if err != nil {
+			panic(err)
+		}
+
+		// check access
+		err = h.CheckAccess("update", sh, el)
+		if err != nil {
+			panic(err)
+		}
+
 		s.Update(c.GetKey(), c.GetParentKey(), e)
 
 		json.NewEncoder(w).Encode(data.Resp{
@@ -140,9 +175,16 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		s := h.Service(r)
 		el := h.EntityList()
 		c := h.Context(r)
+		var err error
 
 		// retrieve all entities with c.Key
-		err := s.Retrieve(c.GetKey(), c.GetParentKey(), el)
+		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
+		if err != nil {
+			panic(err)
+		}
+
+		// check access
+		err = h.CheckAccess("delete", sh, el)
 		if err != nil {
 			panic(err)
 		}

@@ -16,10 +16,10 @@ type UserInterestRest struct {
 	subPath  string
 }
 
-// return the scope requires for
-// a certain kind of access type
-func (h *UserInterestRest) ScopeOf(access string) string {
-	return "user_interests"
+// check the session and see if it has the access
+// that is required
+func (h *UserInterestRest) CheckAccess(access string, sh SessionHandler, ref interface{}) (err error) {
+	return
 }
 
 // path which only include contextual information
