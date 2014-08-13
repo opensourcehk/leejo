@@ -1,6 +1,8 @@
 package data
 
 type Resp struct {
-	Status string      `json:"status"`
-	Result interface{} `json:"result"`
+	Status  string      `json:"status"`
+	Code    int         `json:"code,omitempty"`
+	Message string      `json:"message,omitempty"`
+	Result  interface{} `json:"result,omitempty"`
 }

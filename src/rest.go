@@ -41,6 +41,31 @@ type PatRestHelper interface {
 	CheckAccess(string, session.Session, interface{}) error
 }
 
+func RestError(w http.ResponseWriter, err error) {
+
+	if err == nil {
+		return
+	}
+
+	resp := data.Resp{
+		Status: "fail",
+		Code:   500,
+	}
+
+	if se, ok := err.(service.EntityError); ok {
+		resp.Code = se.Code()
+		resp.Message = se.Error()
+	} else {
+		resp.Message = "Internal Server Error"
+	}
+
+	log.Printf("Internal Server Error: %s", err.Error())
+
+	w.WriteHeader(resp.Code)
+	json.NewEncoder(w).Encode(resp)
+
+}
+
 // create REST CURD interface with PatRestHelper and pat router
 // it knows nothing about the underlying database implementation
 // it only handles JSON communication and error handling with http client
@@ -60,13 +85,15 @@ func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 		// retrieve all of entities in context c
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		// check access
 		err = h.CheckAccess("retrieve", sess, el)
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		json.NewEncoder(w).Encode(data.Resp{
@@ -88,13 +115,15 @@ func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 		// check access
 		err = h.CheckAccess("list", sess, c.GetParentKey())
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		// dummy limit and offset for now
 		err = s.List(c.GetKey(), el)
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		json.NewEncoder(w).Encode(data.Resp{
@@ -118,14 +147,14 @@ func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 		bytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("Error reading request: ", err)
-			w.WriteHeader(500)
+			RestError(w, err)
 			return
 		}
 
 		err = json.Unmarshal(bytes, e)
 		if err != nil {
 			log.Printf("Error JSON Unmarshal: ", err)
-			w.WriteHeader(500)
+			RestError(w, err)
 			return
 		}
 		log.Printf("Create %#v", e)
@@ -133,12 +162,14 @@ func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 		// check access
 		err = h.CheckAccess("create", sess, nil)
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		err = s.Create(c, e)
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		json.NewEncoder(w).Encode(data.Resp{
@@ -161,14 +192,14 @@ func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 		bytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("Error reading request: ", err)
-			w.WriteHeader(500)
+			RestError(w, err)
 			return
 		}
 
 		err = json.Unmarshal(bytes, e)
 		if err != nil {
 			log.Printf("Error JSON Unmarshal: ", err)
-			w.WriteHeader(500)
+			RestError(w, err)
 			return
 		}
 		log.Printf("Update %#v with %#v", c, e)
@@ -176,13 +207,15 @@ func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 		// retrieve all entities with c.Key
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		// check access
 		err = h.CheckAccess("update", sess, el)
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		s.Update(c.GetKey(), c.GetParentKey(), e)
@@ -206,19 +239,22 @@ func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 		// retrieve all entities with c.Key
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		// check access
 		err = h.CheckAccess("delete", sess, el)
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		// delete the item
 		err = s.Delete(c.GetKey(), c.GetParentKey())
 		if err != nil {
-			panic(err)
+			RestError(w, err)
+			return
 		}
 
 		// remove all results from database
