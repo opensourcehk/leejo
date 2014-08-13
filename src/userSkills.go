@@ -97,5 +97,5 @@ func bindUserSkills(path string, sh SessionHandler, sessPtr *db.Database, r *pat
 		basePath: path,
 		subPath:  "{id:[0-9]+}",
 	}
-	RestOnPat(&h, r)
+	RestOnPat(&h, sh, r)
 }

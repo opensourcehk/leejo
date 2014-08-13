@@ -92,5 +92,5 @@ func bindUser(path string, sh SessionHandler, sessPtr *db.Database, r *pat.Route
 		basePath: path,
 		subPath:  "{id:[0-9]+}",
 	}
-	RestOnPat(&h, r)
+	RestOnPat(&h, sh, r)
 }

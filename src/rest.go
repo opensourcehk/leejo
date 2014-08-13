@@ -43,7 +43,7 @@ type PatRestHelper interface {
 // create REST CURD interface with PatRestHelper and pat router
 // it knows nothing about the underlying database implementation
 // it only handles JSON communication and error handling with http client
-func RestOnPat(h PatRestHelper, r *pat.Router) {
+func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 
 	r.Get(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 		s := h.Service(r)
