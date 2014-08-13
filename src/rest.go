@@ -15,8 +15,12 @@ import (
 type PatRestHelper interface {
 
 	// returns a pat readable regular expression
-	// of an individual entity
-	SubPath() string
+	// to listing endpoint
+	BasePath() string
+
+	// returns a pat readable regular expression
+	// to individual entity
+	EntityPath() string
 
 	// allocate storage service for CURD operations
 	Service(r *http.Request) service.Service
@@ -35,9 +39,9 @@ type PatRestHelper interface {
 // create REST CURD interface with PatRestHelper and pat router
 // it knows nothing about the underlying database implementation
 // it only handles JSON communication and error handling with http client
-func RestOnPat(path string, h PatRestHelper, r *pat.Router) {
+func RestOnPat(h PatRestHelper, r *pat.Router) {
 
-	r.Get(path+"/"+h.SubPath(), func(w http.ResponseWriter, r *http.Request) {
+	r.Get(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 		s := h.Service(r)
 		el := h.EntityList()
 		c := h.Context(r)
@@ -53,7 +57,7 @@ func RestOnPat(path string, h PatRestHelper, r *pat.Router) {
 			Result: el,
 		})
 	})
-	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+	r.Get(h.BasePath(), func(w http.ResponseWriter, r *http.Request) {
 		s := h.Service(r)
 		el := h.EntityList()
 		c := h.Context(r)
@@ -69,7 +73,7 @@ func RestOnPat(path string, h PatRestHelper, r *pat.Router) {
 			Result: el,
 		})
 	})
-	r.Post(path, func(w http.ResponseWriter, r *http.Request) {
+	r.Post(h.BasePath(), func(w http.ResponseWriter, r *http.Request) {
 		s := h.Service(r)
 		e := h.Entity()
 		c := h.Context(r)
@@ -99,7 +103,7 @@ func RestOnPat(path string, h PatRestHelper, r *pat.Router) {
 			Result: []interface{}{e},
 		})
 	})
-	r.Put(path+"/"+h.SubPath(), func(w http.ResponseWriter, r *http.Request) {
+	r.Put(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 		s := h.Service(r)
 		e := h.Entity()
 		c := h.Context(r)
@@ -126,7 +130,7 @@ func RestOnPat(path string, h PatRestHelper, r *pat.Router) {
 			Result: []interface{}{e},
 		})
 	})
-	r.Delete(path+"/"+h.SubPath(), func(w http.ResponseWriter, r *http.Request) {
+	r.Delete(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 		s := h.Service(r)
 		el := h.EntityList()
 		c := h.Context(r)

@@ -12,12 +12,21 @@ import (
 
 // return a typical CURD service for User
 type UserRest struct {
-	Db db.Database
+	Db       db.Database
+	basePath string
+	subPath  string
+}
+
+// path which only include contextual information
+// e.g. /api/user/123/emails
+func (h *UserRest) BasePath() string {
+	return h.basePath
 }
 
 // path which include entity specific information
-func (h *UserRest) SubPath() string {
-	return "{id:[0-9]+}"
+// e.g. /api/user/123/emails/2
+func (h *UserRest) EntityPath() string {
+	return h.basePath + "/" + h.subPath
 }
 
 // allocate storage service for CURD operations of user
@@ -74,7 +83,9 @@ func bindUser(path string, osinServer *osin.Server, sessPtr *db.Database, r *pat
 	sess := *sessPtr
 
 	h := UserRest{
-		Db: sess,
+		Db:       sess,
+		basePath: path,
+		subPath:  "{id:[0-9]+}",
 	}
-	RestOnPat(path, &h, r)
+	RestOnPat(&h, r)
 }
