@@ -1,9 +1,5 @@
 package main
 
-func ObtainSession(code string) (s Session, err error) {
-	return
-}
-
 type SessionUser interface{}
 
 type Session interface {
