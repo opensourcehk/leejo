@@ -7,7 +7,7 @@ export BIN=${ROOT}/bin
 # main targets
 #
 
-all: check build
+all: build check
 
 serve: build
 	@echo "Serve"
