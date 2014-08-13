@@ -78,14 +78,20 @@ func main() {
 	// gorilla pat for routing
 	r := pat.New()
 
+	// define session handler
+	// that works with a osin server
+	sh := &OsinSessionHandler{
+		Server: osinServer,
+	}
+
 	// Users related API
-	bindUser("/api.v1/users", osinServer, &sess, r)
+	bindUser("/api.v1/users", sh, &sess, r)
 
 	// UserSkills related API
-	bindUserSkills("/api.v1/userSkills/{user_id:[0-9]+}", osinServer, &sess, r)
+	bindUserSkills("/api.v1/userSkills/{user_id:[0-9]+}", sh, &sess, r)
 
 	// UserInterests related API
-	bindUserInterests("/api.v1/userInterests/{user_id:[0-9]+}", osinServer, &sess, r)
+	bindUserInterests("/api.v1/userInterests/{user_id:[0-9]+}", sh, &sess, r)
 
 	// handle OAuth2 endpoints
 	oauth2.Bind("/oauth2", osinServer)

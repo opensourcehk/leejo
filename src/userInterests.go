@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/RangelReale/osin"
 	"github.com/gorilla/pat"
 	"github.com/gourd/service"
 	"github.com/gourd/service/upperio"
@@ -90,7 +89,7 @@ func (h *UserInterestRest) EntityList() service.EntityListPtr {
 }
 
 // create user CURD interface with pat
-func bindUserInterests(path string, osinServer *osin.Server, sessPtr *db.Database, r *pat.Router) {
+func bindUserInterests(path string, sh SessionHandler, sessPtr *db.Database, r *pat.Router) {
 	sess := *sessPtr
 
 	h := UserInterestRest{
