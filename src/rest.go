@@ -42,7 +42,7 @@ func RestOnPat(path string, h PatRestHelper, r *pat.Router) {
 		el := h.EntityList()
 		c := h.Context(r)
 
-		// retrieve all users of c.Key
+		// retrieve all of entities in context c
 		err := s.Retrieve(c, el)
 		if err != nil {
 			panic(err)
