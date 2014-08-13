@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/gorilla/pat"
 	"github.com/gourd/service"
-	"io/ioutil"
 	"leejo/data"
 	"leejo/session"
 	"log"
@@ -143,15 +142,7 @@ func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 		c := h.Context(sess)
 
 		// TODO: find a way to enforce parent key
-
-		bytes, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			log.Printf("Error reading request: ", err)
-			RestError(w, err)
-			return
-		}
-
-		err = json.Unmarshal(bytes, e)
+		err = json.NewDecoder(r.Body).Decode(e)
 		if err != nil {
 			log.Printf("Error JSON Unmarshal: ", err)
 			RestError(w, err)
@@ -189,14 +180,7 @@ func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 		s := h.Service(sess)
 		c := h.Context(sess)
 
-		bytes, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			log.Printf("Error reading request: ", err)
-			RestError(w, err)
-			return
-		}
-
-		err = json.Unmarshal(bytes, e)
+		err = json.NewDecoder(r.Body).Decode(e)
 		if err != nil {
 			log.Printf("Error JSON Unmarshal: ", err)
 			RestError(w, err)
