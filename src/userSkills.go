@@ -38,13 +38,13 @@ func (h *UserSkillRest) Service(r *http.Request) service.Service {
 		},
 		KeyCondFunc: func(c service.Context) db.Cond {
 			return db.Cond{
-				"user_id":       c.Get(":user_id"),
-				"user_skill_id": c.Get(":id"),
+				"user_id":       c.GetParentKey(),
+				"user_skill_id": c.GetKey(),
 			}
 		},
 		ParentCondFunc: func(c service.Context) db.Cond {
 			return db.Cond{
-				"user_id": c.Get(":user_id"),
+				"user_skill_id": c.GetParentKey(),
 			}
 		},
 	}
@@ -52,8 +52,11 @@ func (h *UserSkillRest) Service(r *http.Request) service.Service {
 
 // translate an http request into a query context
 func (h *UserSkillRest) Context(r *http.Request) service.Context {
+	q := r.URL.Query()
 	return &service.BasicContext{
-		Values: r.URL.Query(),
+		Key:       q.Get(":id"),
+		ParentKey: q.Get(":user_id"),
+		Values:    q,
 		Cond: &service.BasicListCond{
 			Limit:  20,
 			Offset: 0,
