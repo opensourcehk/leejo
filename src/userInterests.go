@@ -89,9 +89,7 @@ func (h *UserInterestRest) EntityList() service.EntityListPtr {
 }
 
 // create user CURD interface with pat
-func bindUserInterests(path string, sh SessionHandler, sessPtr *db.Database, r *pat.Router) {
-	sess := *sessPtr
-
+func bindUserInterests(path string, sh SessionHandler, sess db.Database, r *pat.Router) {
 	h := UserInterestRest{
 		Db:       sess,
 		basePath: path,

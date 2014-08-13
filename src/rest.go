@@ -14,10 +14,6 @@ import (
 // a REST CURD interface
 type PatRestHelper interface {
 
-	// check if the session allow
-	// the kind of access to this object
-	CheckAccess(string, SessionHandler, interface{}) error
-
 	// returns a pat readable regular expression
 	// to listing endpoint
 	BasePath() string
@@ -26,6 +22,12 @@ type PatRestHelper interface {
 	// to individual entity
 	EntityPath() string
 
+	// allocate memory of a single entity and return address
+	Entity() service.EntityPtr
+
+	// allocate memory of a slice of entity and return address
+	EntityList() service.EntityListPtr
+
 	// allocate storage service for CURD operations
 	Service(r *http.Request) service.Service
 
@@ -33,11 +35,10 @@ type PatRestHelper interface {
 	// i.e. key, parent key, query conditions, limit, offset and etc.
 	Context(r *http.Request) service.Context
 
-	// allocate memory of a single entity and return address
-	Entity() service.EntityPtr
+	// check if the session allow
+	// the kind of access to this object
+	CheckAccess(string, SessionHandler, interface{}) error
 
-	// allocate memory of a slice of entity and return address
-	EntityList() service.EntityListPtr
 }
 
 // create REST CURD interface with PatRestHelper and pat router

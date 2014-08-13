@@ -89,9 +89,7 @@ func (h *UserSkillRest) EntityList() service.EntityListPtr {
 }
 
 // create user CURD interface with pat
-func bindUserSkills(path string, sh SessionHandler, sessPtr *db.Database, r *pat.Router) {
-	sess := *sessPtr
-
+func bindUserSkills(path string, sh SessionHandler, sess db.Database, r *pat.Router) {
 	h := UserSkillRest{
 		Db:       sess,
 		basePath: path,
