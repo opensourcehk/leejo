@@ -50,15 +50,14 @@ func (d *apiAuthData) ToOsin() (od *osin.AuthorizeData) {
 		Client: &osin.DefaultClient{
 			Id: d.ClientId,
 		},
-		Scope: d.Scope,
-		State: d.State,
+		Scope:       d.Scope,
+		State:       d.State,
 		RedirectUri: d.RedirectUri,
-		ExpiresIn: int32(d.Expired - time.Now().Unix()),
-		CreatedAt: time.Unix(d.Created, 0),
+		ExpiresIn:   int32(d.Expired - time.Now().Unix()),
+		CreatedAt:   time.Unix(d.Created, 0),
 	}
 	return
 }
-
 
 // database adapted struct
 type apiAccess struct {
@@ -84,12 +83,12 @@ func (d *apiAccess) FromOsin(od *osin.AccessData) *apiAccess {
 
 func (d *apiAccess) ToOsin() (od *osin.AccessData) {
 	od = &osin.AccessData{
-		AccessToken: d.AccessToken,
+		AccessToken:  d.AccessToken,
 		RefreshToken: d.RefreshToken,
 		Client: &osin.DefaultClient{
 			Id: d.ClientId,
 		},
-		Scope: d.Scope,
+		Scope:     d.Scope,
 		ExpiresIn: int32(d.Expired - time.Now().Unix()),
 		CreatedAt: time.Unix(d.Created, 0),
 	}

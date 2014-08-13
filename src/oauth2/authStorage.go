@@ -63,7 +63,7 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 
 	ds := []apiAuthData{}
 	res := ac.Find(db.Cond{
-		"code":      code,
+		"code": code,
 	})
 	err = res.All(&ds)
 	log.Printf("AuthData retrieved: %s: %#v\n", code, ds)
@@ -99,7 +99,7 @@ func (a *AuthStorage) RemoveAuthorize(code string) (err error) {
 	}
 
 	res := ac.Find(db.Cond{
-		"code":      code,
+		"code": code,
 	})
 	err = res.Remove()
 

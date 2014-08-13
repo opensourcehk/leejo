@@ -11,6 +11,7 @@ func useOsinStorage(s osin.Storage) {
 }
 
 func Test_AuthStorage(t *testing.T) {
+	t.Parallel()
 	a := AuthStorage{}
 	useOsinStorage(&a)
 }
