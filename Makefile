@@ -12,23 +12,35 @@ all: build
 serve: build
 	./bin/leejo_server -config ./data/config.json
 
-build: bin/leejo_server
+build: fmt bin/leejo_server
 
-test: bin/integration_test
+test: fmt bin/integration_test
 	@echo "Integration Test"
 	@bin/integration_test
+	@echo
 
 check:
 	@echo "Unit Test"
+	@echo "========="
 	@cd src; go test
 	@cd src/data; go test
 	@cd src/oauth2; go test
 	@cd tests; go test
+	@echo
+
+fmt:
+	@echo "Format Code"
+	@echo "==========="
+	cd src; go fmt
+	cd src/data; go fmt
+	cd src/oauth2; go fmt
+	cd tests; go fmt
+	@echo
 
 clean:
 	rm -Rf bin/*
 
-.PHONY: all serve build check test clean
+.PHONY: all serve build test check fmt clean
 
 
 
