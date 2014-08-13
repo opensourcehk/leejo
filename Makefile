@@ -7,7 +7,7 @@ export BIN=${ROOT}/bin
 # main targets
 #
 
-all: build check
+all: check build
 
 serve: build
 	@echo "Serve"
@@ -22,7 +22,7 @@ test: fmt bin/integration_test
 	@bin/integration_test
 	@echo
 
-check:
+check: build-preq test-preq
 	@echo "Unit Test"
 	@echo "========="
 	@cd src; go test
@@ -51,12 +51,14 @@ clean:
 # server
 #
 
-bin/leejo_server: pat gourd-service osin upper-db-pgsql
+bin/leejo_server: build-preq
 	@echo "Build Server"
 	@echo "============"
 	cd src; go test -i
 	cd src; go build -o ${BIN}/leejo_server
 	@echo
+
+build-preq: pat gourd-service osin upper-db-pgsql
 
 pat: gopath/src/github.com/gorilla/pat
 
@@ -103,10 +105,12 @@ gopath/src/github.com/RangelReale/osin:
 # tests
 #
 
-bin/integration_test: \
+test-preq: \
 	gopath/src/github.com/jmcvetta/napping \
 	gopath/src/github.com/yookoala/restit \
 	gopath/src/github.com/skratchdot/open-golang/open
+
+bin/integration_test: test-preq
 	@echo "Build Integration Test"
 	@echo "======================"
 	cd tests; go build -o ${BIN}/integration_test
@@ -121,4 +125,4 @@ gopath/src/github.com/jmcvetta/napping:
 gopath/src/github.com/skratchdot/open-golang/open:
 	go get github.com/skratchdot/open-golang/open
 
-.PHONY: bin/integration_test
+.PHONY: test-preq bin/integration_test
