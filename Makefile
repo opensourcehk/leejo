@@ -25,11 +25,11 @@ test: fmt bin/integration_test
 check: build-preq test-preq
 	@echo "Unit Test"
 	@echo "========="
-	@cd src; go test
-	@cd src/data; go test
-	@cd src/oauth2; go test
-	@cd src/session; go test
-	@cd tests; go test
+	@cd src; go test -i; go test
+	@cd src/data; go test -i; go test
+	@cd src/oauth2; go test -i; go test
+	@cd src/session; go test -i; go test
+	@cd tests; go test -i; go test
 	@echo
 
 fmt:
