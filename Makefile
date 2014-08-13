@@ -37,6 +37,7 @@ clean:
 #
 
 bin/leejo_server: pat gourd-service osin upper-db-pgsql
+	cd src; go test -i
 	cd src; go build -o ${BIN}/leejo_server
 
 pat: gopath/src/github.com/gorilla/pat
