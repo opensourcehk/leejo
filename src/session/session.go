@@ -1,28 +1,40 @@
-package main
+package session
+
+import (
+	"net/http"
+)
 
 type SessionUser interface{}
 
 type Session interface {
 
+	// obtain user
+	GetUser() SessionUser
+
 	// test if
 	HasScope(string) bool
 
-	// obtain user
-	GetUser() SessionUser
+	// returns raw *http.Request
+	R() *http.Request
 }
 
 // basic implementation of Session interface
 type BasicSession struct {
-	Scopes *Scopes
-	User   SessionUser
+	Request *http.Request
+	Scopes  *Scopes
+	User    SessionUser
+}
+
+func (a *BasicSession) GetUser() (u SessionUser) {
+	return
 }
 
 func (a *BasicSession) HasScope(scope string) bool {
 	return a.Scopes.Has(scope)
 }
 
-func (a *BasicSession) GetUser() (u SessionUser) {
-	return
+func (a *BasicSession) R() *http.Request {
+	return a.Request
 }
 
 // scope handler

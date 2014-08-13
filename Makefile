@@ -28,6 +28,7 @@ check: build-preq test-preq
 	@cd src; go test
 	@cd src/data; go test
 	@cd src/oauth2; go test
+	@cd src/session; go test
 	@cd tests; go test
 	@echo
 
@@ -37,6 +38,7 @@ fmt:
 	cd src; go fmt
 	cd src/data; go fmt
 	cd src/oauth2; go fmt
+	cd src/session; go fmt
 	cd tests; go fmt
 	@echo
 

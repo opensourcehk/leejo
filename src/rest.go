@@ -6,6 +6,7 @@ import (
 	"github.com/gourd/service"
 	"io/ioutil"
 	"leejo/data"
+	"leejo/session"
 	"log"
 	"net/http"
 )
@@ -29,28 +30,32 @@ type PatRestHelper interface {
 	EntityList() service.EntityListPtr
 
 	// allocate storage service for CURD operations
-	Service(r *http.Request) service.Service
+	Service(s session.Session) service.Service
 
 	// translate an http request into a query context
 	// i.e. key, parent key, query conditions, limit, offset and etc.
-	Context(r *http.Request) service.Context
+	Context(s session.Session) service.Context
 
 	// check if the session allow
 	// the kind of access to this object
-	CheckAccess(string, SessionHandler, interface{}) error
-
+	CheckAccess(string, session.Session, interface{}) error
 }
 
 // create REST CURD interface with PatRestHelper and pat router
 // it knows nothing about the underlying database implementation
 // it only handles JSON communication and error handling with http client
-func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
+func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
 
 	r.Get(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
-		s := h.Service(r)
-		el := h.EntityList()
-		c := h.Context(r)
+
+		// allocate memory for variables
 		var err error
+		el := h.EntityList()
+
+		// get service and context
+		sess, err := sh.Session(r)
+		s := h.Service(sess)
+		c := h.Context(sess)
 
 		// retrieve all of entities in context c
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
@@ -59,7 +64,7 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		}
 
 		// check access
-		err = h.CheckAccess("retrieve", sh, el)
+		err = h.CheckAccess("retrieve", sess, el)
 		if err != nil {
 			panic(err)
 		}
@@ -70,13 +75,18 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		})
 	})
 	r.Get(h.BasePath(), func(w http.ResponseWriter, r *http.Request) {
-		s := h.Service(r)
-		el := h.EntityList()
-		c := h.Context(r)
+
+		// allocate memory for variables
 		var err error
+		el := h.EntityList()
+
+		// get service and context
+		sess, err := sh.Session(r)
+		s := h.Service(sess)
+		c := h.Context(sess)
 
 		// check access
-		err = h.CheckAccess("list", sh, c.GetParentKey())
+		err = h.CheckAccess("list", sess, c.GetParentKey())
 		if err != nil {
 			panic(err)
 		}
@@ -93,10 +103,15 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		})
 	})
 	r.Post(h.BasePath(), func(w http.ResponseWriter, r *http.Request) {
-		s := h.Service(r)
-		e := h.Entity()
-		c := h.Context(r)
+
+		// allocate memory for variables
 		var err error
+		e := h.Entity()
+
+		// get service and context
+		sess, err := sh.Session(r)
+		s := h.Service(sess)
+		c := h.Context(sess)
 
 		// TODO: find a way to enforce parent key
 
@@ -116,7 +131,7 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		log.Printf("Create %#v", e)
 
 		// check access
-		err = h.CheckAccess("create", sh, nil)
+		err = h.CheckAccess("create", sess, nil)
 		if err != nil {
 			panic(err)
 		}
@@ -132,11 +147,16 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		})
 	})
 	r.Put(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
-		s := h.Service(r)
+
+		// allocate memory for variables
+		var err error
 		e := h.Entity()
 		el := h.EntityList()
-		c := h.Context(r)
-		var err error
+
+		// get service and context
+		sess, err := sh.Session(r)
+		s := h.Service(sess)
+		c := h.Context(sess)
 
 		bytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -160,7 +180,7 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		}
 
 		// check access
-		err = h.CheckAccess("update", sh, el)
+		err = h.CheckAccess("update", sess, el)
 		if err != nil {
 			panic(err)
 		}
@@ -173,10 +193,15 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		})
 	})
 	r.Delete(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
-		s := h.Service(r)
-		el := h.EntityList()
-		c := h.Context(r)
+
+		// allocate memory for variables
 		var err error
+		el := h.EntityList()
+
+		// get service and context
+		sess, err := sh.Session(r)
+		s := h.Service(sess)
+		c := h.Context(sess)
 
 		// retrieve all entities with c.Key
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
@@ -185,7 +210,7 @@ func RestOnPat(h PatRestHelper, sh SessionHandler, r *pat.Router) {
 		}
 
 		// check access
-		err = h.CheckAccess("delete", sh, el)
+		err = h.CheckAccess("delete", sess, el)
 		if err != nil {
 			panic(err)
 		}

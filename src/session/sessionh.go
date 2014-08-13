@@ -1,4 +1,4 @@
-package main
+package session
 
 import (
 	"github.com/RangelReale/osin"
@@ -18,5 +18,8 @@ type OsinSessionHandler struct {
 }
 
 func (h *OsinSessionHandler) Session(r *http.Request) (s Session, err error) {
+	s = &BasicSession{
+		Request: r,
+	}
 	return
 }

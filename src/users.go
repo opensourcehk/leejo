@@ -5,7 +5,7 @@ import (
 	"github.com/gourd/service"
 	"github.com/gourd/service/upperio"
 	"leejo/data"
-	"net/http"
+	"leejo/session"
 	"upper.io/db"
 )
 
@@ -18,7 +18,7 @@ type UserRest struct {
 
 // check the session and see if it has the access
 // that is required
-func (h *UserRest) CheckAccess(access string, sh SessionHandler, ref interface{}) (err error) {
+func (h *UserRest) CheckAccess(access string, sess session.Session, ref interface{}) (err error) {
 	return
 }
 
@@ -35,7 +35,7 @@ func (h *UserRest) EntityPath() string {
 }
 
 // allocate storage service for CURD operations of user
-func (h *UserRest) Service(r *http.Request) service.Service {
+func (h *UserRest) Service(s session.Session) service.Service {
 	// the content of service would be database specific
 	// but the interface of service would be generic
 	return &upperio.Service{
@@ -60,8 +60,8 @@ func (h *UserRest) Service(r *http.Request) service.Service {
 }
 
 // translate an http request into a query context
-func (h *UserRest) Context(r *http.Request) service.Context {
-	q := r.URL.Query()
+func (h *UserRest) Context(s session.Session) service.Context {
+	q := s.R().URL.Query()
 	return &service.BasicContext{
 		Key:       q.Get(":id"),
 		ParentKey: nil,
@@ -84,7 +84,7 @@ func (h *UserRest) EntityList() service.EntityListPtr {
 }
 
 // create user CURD interface with pat
-func bindUser(path string, sh SessionHandler, sess db.Database, r *pat.Router) {
+func bindUser(path string, sh session.SessionHandler, sess db.Database, r *pat.Router) {
 	h := UserRest{
 		Db:       sess,
 		basePath: path,

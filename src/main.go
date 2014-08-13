@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/pat"
 	"io/ioutil"
 	"leejo/oauth2"
+	"leejo/session"
 	"net/http"
 	"os"
 	"upper.io/db"
@@ -80,7 +81,7 @@ func main() {
 
 	// define session handler
 	// that works with a osin server
-	sh := &OsinSessionHandler{
+	sh := &session.OsinSessionHandler{
 		Server: osinServer,
 	}
 
