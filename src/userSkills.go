@@ -45,15 +45,15 @@ func (h *UserSkillRest) Service(r *http.Request) service.Service {
 			l := el.(*[]data.UserSkill)
 			return uint64(len(*l))
 		},
-		KeyCondFunc: func(c service.Context) db.Cond {
+		KeyCondFunc: func(k service.Key, pk service.ParentKey) db.Cond {
 			return db.Cond{
-				"user_id":       c.GetParentKey(),
-				"user_skill_id": c.GetKey(),
+				"user_id":       pk,
+				"user_skill_id": k,
 			}
 		},
-		ParentCondFunc: func(c service.Context) db.Cond {
+		ParentCondFunc: func(pk service.ParentKey) db.Cond {
 			return db.Cond{
-				"user_skill_id": c.GetParentKey(),
+				"user_skill_id": pk,
 			}
 		},
 	}

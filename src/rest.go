@@ -47,7 +47,7 @@ func RestOnPat(h PatRestHelper, r *pat.Router) {
 		c := h.Context(r)
 
 		// retrieve all of entities in context c
-		err := s.Retrieve(c, el)
+		err := s.Retrieve(c.GetKey(), c.GetParentKey(), el)
 		if err != nil {
 			panic(err)
 		}
@@ -63,7 +63,7 @@ func RestOnPat(h PatRestHelper, r *pat.Router) {
 		c := h.Context(r)
 
 		// dummy limit and offset for now
-		err := s.List(c, el)
+		err := s.List(c.GetKey(), el)
 		if err != nil {
 			panic(err)
 		}
@@ -77,6 +77,8 @@ func RestOnPat(h PatRestHelper, r *pat.Router) {
 		s := h.Service(r)
 		e := h.Entity()
 		c := h.Context(r)
+
+		// TODO: find a way to enforce parent key
 
 		bytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -123,7 +125,7 @@ func RestOnPat(h PatRestHelper, r *pat.Router) {
 		}
 		log.Printf("Update %#v with %#v", c, e)
 
-		s.Update(c, e)
+		s.Update(c.GetKey(), c.GetParentKey(), e)
 
 		json.NewEncoder(w).Encode(data.Resp{
 			Status: "OK",
@@ -136,13 +138,13 @@ func RestOnPat(h PatRestHelper, r *pat.Router) {
 		c := h.Context(r)
 
 		// retrieve all entities with c.Key
-		err := s.Retrieve(c, el)
+		err := s.Retrieve(c.GetKey(), c.GetParentKey(), el)
 		if err != nil {
 			panic(err)
 		}
 
 		// delete the item
-		err = s.Delete(c)
+		err = s.Delete(c.GetKey(), c.GetParentKey())
 		if err != nil {
 			panic(err)
 		}
