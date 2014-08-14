@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/gorilla/pat"
 	"github.com/gourd/service"
 	"github.com/gourd/service/upperio"
 	"leejo/data"
@@ -86,14 +85,4 @@ func (h *UserSkillRest) Entity() service.EntityPtr {
 // allocate a slice of entity and return the address
 func (h *UserSkillRest) EntityList() service.EntityListPtr {
 	return &[]data.UserSkill{}
-}
-
-// create user CURD interface with pat
-func bindUserSkills(path string, sh session.SessionHandler, sess db.Database, r *pat.Router) {
-	h := UserSkillRest{
-		Db:       sess,
-		basePath: path,
-		subPath:  "{id:[0-9]+}",
-	}
-	RestOnPat(&h, sh, r)
 }

@@ -58,45 +58,64 @@ func main() {
 	}
 	defer dbs.Close()
 
+	// Users REST API helper
+	uh := &UserRest{
+		Db:       dbs,
+		basePath: "/api.v1/users",
+		subPath:  "{id:[0-9]+}",
+	}
+
+	// UserSkills REST API helper
+	ush := &UserSkillRest{
+		Db:       dbs,
+		basePath: "/api.v1/userSkills/{user_id:[0-9]+}",
+		subPath:  "{id:[0-9]+}",
+	}
+
+	// UserInterests REST API helper
+	uih := &UserInterestRest{
+		Db:       dbs,
+		basePath: "/api.v1/userInterests/{user_id:[0-9]+}",
+		subPath:  "{id:[0-9]+}",
+	}
+
 	// oauth2 related config
-	osinConf := osin.NewServerConfig()
-	osinConf.AllowGetAccessRequest = true
-	osinConf.AllowClientSecretInParams = true
-	osinConf.AllowedAccessTypes = osin.AllowedAccessType{
+	oConf := osin.NewServerConfig()
+	oConf.AllowGetAccessRequest = true
+	oConf.AllowClientSecretInParams = true
+	oConf.AllowedAccessTypes = osin.AllowedAccessType{
 		osin.AUTHORIZATION_CODE,
 		osin.REFRESH_TOKEN,
 	}
-	osinConf.AllowedAuthorizeTypes = osin.AllowedAuthorizeType{
+	oConf.AllowedAuthorizeTypes = osin.AllowedAuthorizeType{
 		osin.CODE,
 		osin.TOKEN,
 	}
 
-	// OAuth2 endpoints handler
-	osinStorage := &oauth2.AuthStorage{
+	// oauth2 endpoints handler
+	oStore := &oauth2.AuthStorage{
 		Db: dbs,
 	}
-	osinServer := osin.NewServer(osinConf, osinStorage)
-
-	// gorilla pat for routing
-	r := pat.New()
 
 	// define session handler
 	// that works with a osin server
 	sh := &session.OsinSessionHandler{
-		Storage: osinStorage,
+		Storage: oStore,
 	}
 
-	// Users related API
-	bindUser("/api.v1/users", sh, dbs, r)
+	// handle login
+	lh := &AuthHandler{}
 
-	// UserSkills related API
-	bindUserSkills("/api.v1/userSkills/{user_id:[0-9]+}", sh, dbs, r)
+	// gorilla pat for routing
+	r := pat.New()
 
-	// UserInterests related API
-	bindUserInterests("/api.v1/userInterests/{user_id:[0-9]+}", sh, dbs, r)
+	// map API to pat router
+	RestOnPat(uh, sh, r)
+	RestOnPat(ush, sh, r)
+	RestOnPat(uih, sh, r)
 
 	// handle OAuth2 endpoints
-	oauth2.Bind("/oauth2", osinServer)
+	oauth2.BindOsin("/oauth2", osin.NewServer(oConf, oStore), lh)
 
 	http.Handle("/", r)
 	http.ListenAndServe(":8080", nil)

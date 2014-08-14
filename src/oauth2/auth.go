@@ -6,17 +6,22 @@ import (
 	"net/http"
 )
 
-func Bind(authPath string, osinServer *osin.Server) {
+// interface to handle login and authorization
+type AuthHandler interface {
+	HandleLogin(*osin.AuthorizeRequest, http.ResponseWriter, *http.Request) error
+}
+
+// bind the endpoints to http server
+func BindOsin(authPath string, osinServer *osin.Server, lh AuthHandler) {
 
 	// handle OAuth2 endpoints
 	http.HandleFunc(authPath+"/authorize", func(w http.ResponseWriter, r *http.Request) {
 		resp := osinServer.NewResponse()
 		if ar := osinServer.HandleAuthorizeRequest(resp, r); ar != nil {
-			// HANDLE LOGIN PAGE HERE
-			// TODO:
-			// 1. check if there is login data. If not, show form
-			// 2. if there is login data from form, search for matched user
-			// 3. if user exists, get user data and assign to ar.UserData, ar.Authorized = true
+			// handle login page
+			if err := lh.HandleLogin(ar, w, r); err != nil {
+				return
+			}
 			ar.Authorized = true
 			osinServer.FinishAuthorizeRequest(resp, r, ar)
 		}
@@ -37,10 +42,9 @@ func Bind(authPath string, osinServer *osin.Server) {
 		}
 
 		if ar := osinServer.HandleAccessRequest(resp, r); ar != nil {
+			// TODO: handle authorization
+			// check if the user has the permission to grant the scope
 			log.Printf("Access successful")
-			// TODO:
-			// 1. check the auth code, client id and secret (or is it checked already?)
-			// 2. if checking pass, generate and return token (or is it handled already?)
 			ar.Authorized = true
 			osinServer.FinishAccessRequest(resp, r, ar)
 		} else if resp.InternalError != nil {
