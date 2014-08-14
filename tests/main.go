@@ -2,9 +2,17 @@ package main
 
 import (
 	"log"
+	"os"
 )
 
 func main() {
+
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Integration Tests Failed\n")
+			os.Exit(1)
+		}
+	}()
 
 	// test authentication service
 	token, err := testAuth()
