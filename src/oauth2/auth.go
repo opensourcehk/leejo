@@ -22,6 +22,7 @@ func BindOsin(authPath string, osinServer *osin.Server, lh AuthHandler) {
 			if err := lh.HandleLogin(ar, w, r); err != nil {
 				return
 			}
+			log.Printf("OAuth2 Authorize Request: User obtained: %#v", ar.UserData)
 			ar.Authorized = true
 			osinServer.FinishAuthorizeRequest(resp, r, ar)
 		}

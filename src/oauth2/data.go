@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"github.com/RangelReale/osin"
+	"log"
 	"time"
 )
 
@@ -20,11 +21,25 @@ func (c *apiClient) ToOsin() osin.Client {
 	}
 }
 
+// User interface
+type User interface {
+	GetId() int64
+}
+
+// implementation for User interface
+type apiAuthUser struct {
+	Id int64
+}
+
+func (u *apiAuthUser) GetId() int64 {
+	return u.Id
+}
+
 // database adapted struct
 type apiAuthData struct {
-	Id          int    `db:"id,omitempty"`
+	Id          int64  `db:"id,omitempty"`
 	Code        string `db:"code"`
-	UserId      int    `db:"user_id"`
+	UserId      int64  `db:"user_id"`
 	ClientId    string `db:"client_id"`
 	Scope       string `db:"scope"`
 	State       string `db:"state"`
@@ -34,6 +49,12 @@ type apiAuthData struct {
 }
 
 func (d *apiAuthData) FromOsin(od *osin.AuthorizeData) *apiAuthData {
+
+	// attempt to case userdata
+	if user, ok := od.UserData.(User); ok {
+		d.UserId = user.GetId()
+	}
+
 	d.Code = od.Code
 	d.ClientId = od.Client.GetId()
 	d.Scope = od.Scope
@@ -55,23 +76,32 @@ func (d *apiAuthData) ToOsin() (od *osin.AuthorizeData) {
 		RedirectUri: d.RedirectUri,
 		ExpiresIn:   int32(d.Expired - time.Now().Unix()),
 		CreatedAt:   time.Unix(d.Created, 0),
+		UserData: &apiAuthUser{
+			Id: d.UserId,
+		},
 	}
 	return
 }
 
 // database adapted struct
 type apiAccess struct {
-	Id           int    `db:"id,omitempty"`
+	Id           int64  `db:"id,omitempty"`
 	AccessToken  string `db:"access_token"`
 	RefreshToken string `db:"refresh_token"`
 	ClientId     string `db:"client_id"`
-	UserId       int    `db:"user_id"`
+	UserId       int64  `db:"user_id"`
 	Scope        string `db:"scope"`
 	Created      int64  `db:"created_timestamp"`
 	Expired      int64  `db:"expired_timestamp"`
 }
 
 func (d *apiAccess) FromOsin(od *osin.AccessData) *apiAccess {
+
+	// attempt to case userdata
+	if user, ok := od.UserData.(User); ok {
+		d.UserId = user.GetId()
+	}
+
 	d.AccessToken = od.AccessToken
 	d.RefreshToken = od.RefreshToken
 	d.ClientId = od.Client.GetId()
@@ -91,6 +121,9 @@ func (d *apiAccess) ToOsin() (od *osin.AccessData) {
 		Scope:     d.Scope,
 		ExpiresIn: int32(d.Expired - time.Now().Unix()),
 		CreatedAt: time.Unix(d.Created, 0),
+		UserData: &apiAuthUser{
+			Id: d.UserId,
+		},
 	}
 	return
 }
