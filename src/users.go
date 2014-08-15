@@ -53,26 +53,24 @@ func (h *UserRest) Service(s session.Session) service.Service {
 			l := el.(*[]data.User)
 			return uint64(len(*l))
 		},
-		KeyCondFunc: func(k service.Key, pk service.ParentKey) db.Cond {
-			return db.Cond{"user_id": k}
+		KeyCondFunc: func(k service.Key, pk service.ParentKey) service.Conds {
+			return service.NewConds().Add("user_id", k)
 		},
-		ParentCondFunc: func(pk service.ParentKey) db.Cond {
-			return db.Cond{}
+		ListCondFunc: func(pk service.ParentKey) service.Conds {
+			return service.NewConds().SetLimit(20)
 		},
 	}
 }
 
 // translate an http request into a query context
 func (h *UserRest) Context(s session.Session) service.Context {
-	q := s.R().URL.Query()
+	c := service.NewConds().
+		SetLimit(20).
+		SetOffset(0)
 	return &service.BasicContext{
-		Key:       q.Get(":id"),
+		Key:       s.R().URL.Query().Get(":id"),
 		ParentKey: nil,
-		Values:    q,
-		Cond: &service.BasicListCond{
-			Limit:  20,
-			Offset: 0,
-		},
+		Conds:     c,
 	}
 }
 

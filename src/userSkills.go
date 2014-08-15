@@ -49,16 +49,17 @@ func (h *UserSkillRest) Service(s session.Session) service.Service {
 			l := el.(*[]data.UserSkill)
 			return uint64(len(*l))
 		},
-		KeyCondFunc: func(k service.Key, pk service.ParentKey) db.Cond {
-			return db.Cond{
-				"user_id":       pk,
-				"user_skill_id": k,
-			}
+		KeyCondFunc: func(k service.Key, pk service.ParentKey) service.Conds {
+			c := service.NewConds().
+				Add("user_id", pk).
+				Add("user_skill_id", k)
+			return c
 		},
-		ParentCondFunc: func(pk service.ParentKey) db.Cond {
-			return db.Cond{
-				"user_id": pk,
-			}
+		ListCondFunc: func(pk service.ParentKey) service.Conds {
+			c := service.NewConds().
+				Add("user_id", pk).
+				SetLimit(20)
+			return c
 		},
 	}
 }
@@ -66,14 +67,13 @@ func (h *UserSkillRest) Service(s session.Session) service.Service {
 // translate an http request into a query context
 func (h *UserSkillRest) Context(s session.Session) service.Context {
 	q := s.R().URL.Query()
+	c := service.NewConds().
+		SetLimit(20).
+		SetOffset(0)
 	return &service.BasicContext{
 		Key:       q.Get(":id"),
 		ParentKey: q.Get(":user_id"),
-		Values:    q,
-		Cond: &service.BasicListCond{
-			Limit:  20,
-			Offset: 0,
-		},
+		Conds:     c,
 	}
 }
 
