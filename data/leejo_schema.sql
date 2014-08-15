@@ -2,13 +2,16 @@
 -- This is the schema used in leejo backend
 --
 
+drop table if exists leejo_user;
 create table leejo_user (
   user_id serial,
   username varchar(255) not null default '',
+  password varchar(255) not null default '',
   gender char(1) not null default 'M',
   primary key (user_id)
 );
 
+drop table if exists leejo_user_skill;
 create table leejo_user_skill (
   user_skill_id serial,
   user_id integer not null default 0,
@@ -16,6 +19,7 @@ create table leejo_user_skill (
   primary key (user_skill_id)
 );
 
+drop table if exists leejo_user_interest;
 create table leejo_user_interest (
   user_interest_id serial,
   user_id integer default 0,
@@ -23,6 +27,7 @@ create table leejo_user_interest (
   primary key (user_interest_id)
 );
 
+drop table if exists leejo_api_client;
 create table leejo_api_client (
   id varchar(255) default '',
   secret varchar(255) default '',
@@ -30,6 +35,7 @@ create table leejo_api_client (
   primary key (id)
 );
 
+drop table if exists leejo_api_authdata;
 create table leejo_api_authdata (
   id serial,
   code varchar(255) default '' unique,
@@ -43,6 +49,7 @@ create table leejo_api_authdata (
   primary key (id)
 );
 
+drop table if exists leejo_api_access;
 create table leejo_api_access (
   id serial,
   access_token varchar(255) default '' unique,

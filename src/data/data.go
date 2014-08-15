@@ -1,9 +1,15 @@
 package data
 
 type User struct {
-	UserId   int64  `json:"user_id" db:"user_id,omitempty" form:"-"`
-	Username string `json:"username" db:"username" form:"username"`
-	Gender   string `json:"gender" db:"gender" form:"gender"`
+	UserId       int64  `json:"user_id" db:"user_id,omitempty",form:"-"`
+	Username     string `json:"username" db:"username",form:"username"`
+	Password     string `json:"password,omitempty" db:"-"`
+	PasswordHash string `json:"-" db:"password" json:"-"`
+	Gender       string `json:"gender" db:"gender" form:"gender"`
+}
+
+func (u *User) GetId() int64 {
+	return u.UserId
 }
 
 type UserSkill struct {
