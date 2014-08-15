@@ -22,6 +22,14 @@ test: fmt bin/integration_test
 	@bin/integration_test
 	@echo
 
+update: clean-gopath get-deps get-test-deps
+
+clean-gopath:
+	rm -Rf gopath/src/github.com
+	rm -Rf gopath/src/code.google.com
+	rm -Rf gopath/src/menteslibres.net
+	rm -Rf gopath/src/upper.io
+
 check: get-deps get-test-deps
 	@echo "Unit Test"
 	@echo "========="
@@ -45,7 +53,7 @@ fmt:
 clean:
 	rm -Rf bin/*
 
-.PHONY: all serve build test check fmt clean
+.PHONY: all update clean-gopath serve build test check fmt clean
 
 
 
