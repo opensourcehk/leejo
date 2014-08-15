@@ -78,11 +78,12 @@ func (h *AuthHandler) HandleLogin(ar *osin.AuthorizeRequest, w http.ResponseWrit
 	err = fmt.Errorf("No login information")
 	w.Write([]byte("<html><body>"))
 	w.Write([]byte(fmt.Sprintf("LOGIN %s (use test/test)<br/>", ar.Client.GetId())))
-	w.Write([]byte(fmt.Sprintf("<form action=\"%s?response_type=%s&client_id=%s&state=%s&redirect_uri=%s\" method=\"POST\">",
+	w.Write([]byte(fmt.Sprintf("<form action=\"%s?response_type=%s&client_id=%s&state=%s&scope=%s&redirect_uri=%s\" method=\"POST\">",
 		r.URL.Path,
 		ar.Type,
 		ar.Client.GetId(),
 		ar.State,
+		ar.Scope,
 		url.QueryEscape(ar.RedirectUri))))
 	w.Write([]byte("Login: <input type=\"text\" name=\"login\" /><br/>"))
 	w.Write([]byte("Password: <input type=\"password\" name=\"password\" /><br/>"))
