@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"leejo/oauth2"
 	"leejo/session"
+	"log"
 	"net/http"
 	"os"
 	"upper.io/db"
@@ -44,6 +45,9 @@ func main() {
 		fmt.Printf("Failed parsing config file \"%s\": %v\n", *confFn, err)
 		os.Exit(1)
 	}
+
+	// logs to stdout
+	log.SetOutput(os.Stdout)
 
 	// connect to database
 	var dbsettings = db.Settings{
@@ -99,12 +103,15 @@ func main() {
 
 	// define session handler
 	// that works with a osin server
-	sh := &session.OsinSessionHandler{
+	sh := &session.OsinHandler{
 		Storage: oStore,
 	}
 
 	// handle login
-	lh := &AuthHandler{}
+	lh := &AuthHandler{
+		SessionHandler: sh,
+		UserHandler:    uh,
+	}
 
 	// gorilla pat for routing
 	r := pat.New()

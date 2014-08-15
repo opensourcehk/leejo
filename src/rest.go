@@ -68,7 +68,7 @@ func RestError(w http.ResponseWriter, err error) {
 // create REST CURD interface with PatRestHelper and pat router
 // it knows nothing about the underlying database implementation
 // it only handles JSON communication and error handling with http client
-func RestOnPat(h PatRestHelper, sh session.SessionHandler, r *pat.Router) {
+func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 
 	r.Get(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 

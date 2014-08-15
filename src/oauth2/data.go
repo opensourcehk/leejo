@@ -2,7 +2,6 @@ package oauth2
 
 import (
 	"github.com/RangelReale/osin"
-	"log"
 	"time"
 )
 

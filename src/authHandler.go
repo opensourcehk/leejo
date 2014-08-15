@@ -3,22 +3,74 @@ package main
 import (
 	"fmt"
 	"github.com/RangelReale/osin"
+	"github.com/gourd/service"
+	"leejo/data"
+	"leejo/session"
+	"log"
 	"net/http"
 	"net/url"
 )
 
 // basic login and authorization handler
 type AuthHandler struct {
+	UserHandler    PatRestHelper
+	SessionHandler session.Handler
 }
 
 func (h *AuthHandler) HandleLogin(ar *osin.AuthorizeRequest, w http.ResponseWriter, r *http.Request) (err error) {
 
 	// parse POST input
 	r.ParseForm()
-	if r.Method == "POST" && r.Form.Get("login") == "test" && r.Form.Get("password") == "test" {
-		// TODO: really handle the login with database data
-		somedata := "some data"
-		ar.UserData = &somedata
+	if r.Method == "POST" {
+		// r.Form.Get("login") == "test" && r.Form.Get("password") == "test" {
+
+		// get login information from form
+		loginName := r.Form.Get("login")
+		loginPass := r.Form.Get("password")
+		if loginName == "" || loginPass == "" {
+			err = fmt.Errorf("Empty Username or Password")
+			return
+		}
+
+		// obtain session
+		var sess session.Session
+		sess, err = h.SessionHandler.Session(r)
+		if err != nil {
+			log.Printf("Session error: %s", err.Error())
+			err = fmt.Errorf("Unknown server error")
+			return
+		}
+
+		// obtain user service
+		us := h.UserHandler.Service(sess)
+
+		// get user from database
+		var users []data.User
+		c := service.NewConds().Add("username", loginName)
+		err = us.Search(c, &users)
+		if err != nil {
+			log.Printf("Error searching user with Service: %s", err.Error())
+			err = fmt.Errorf("Internal Server Error")
+			return
+		}
+
+		// if user does not exists
+		if len(users) == 0 {
+			log.Printf("Unknown user \"%s\" attempt to login", loginName)
+			err = fmt.Errorf("Username or Password incorrect")
+			return
+		}
+
+		// if password does not match
+		// TODO: use hash in password
+		user := users[0]
+		if user.PasswordHash != loginPass {
+			log.Printf("Attempt to login \"%s\" with incorrect password", loginName)
+			err = fmt.Errorf("Username or Password incorrect")
+		}
+
+		// return pointer of user object, allow it to be re-cast
+		ar.UserData = &user
 		return
 	}
 

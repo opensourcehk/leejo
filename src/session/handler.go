@@ -8,18 +8,18 @@ import (
 )
 
 // definition of a session handler
-type SessionHandler interface {
+type Handler interface {
 	// read the http request and returns a session
 	Session(r *http.Request) (Session, error)
 }
 
 // implementation of a session handler
 // that would fetch osin for authentication backend
-type OsinSessionHandler struct {
+type OsinHandler struct {
 	Storage osin.Storage
 }
 
-func (h *OsinSessionHandler) Session(r *http.Request) (s Session, err error) {
+func (h *OsinHandler) Session(r *http.Request) (s Session, err error) {
 
 	// this is the basic return anyway
 	sps := make(Scopes)

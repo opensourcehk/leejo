@@ -4,9 +4,9 @@ import (
 	"testing"
 )
 
-func TestOsinSessionHandler(t *testing.T) {
+func TestOsinHandler(t *testing.T) {
 	t.Parallel()
-	var h SessionHandler
-	h = &OsinSessionHandler{}
+	var h Handler
+	h = &OsinHandler{}
 	t.Logf("Obtained session hander: %#v", h)
 }
