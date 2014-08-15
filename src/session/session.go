@@ -25,8 +25,8 @@ type BasicSession struct {
 	User    SessionUser
 }
 
-func (a *BasicSession) GetUser() (u SessionUser) {
-	return
+func (a *BasicSession) GetUser() SessionUser {
+	return a.User
 }
 
 func (a *BasicSession) HasScope(scope string) bool {
