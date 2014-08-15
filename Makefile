@@ -22,7 +22,7 @@ test: fmt bin/integration_test
 	@bin/integration_test
 	@echo
 
-check: build-preq test-preq
+check: get-deps get-test-deps
 	@echo "Unit Test"
 	@echo "========="
 	@cd src; go test -i; go test
@@ -53,14 +53,14 @@ clean:
 # server
 #
 
-bin/leejo_server: build-preq
+bin/leejo_server: get-deps
 	@echo "Build Server"
 	@echo "============"
 	cd src; go test -i
 	cd src; go build -o ${BIN}/leejo_server
 	@echo
 
-build-preq: pat gourd-service osin upper-db-pgsql
+get-deps: pat gourd-service osin upper-db-pgsql
 
 pat: gopath/src/github.com/gorilla/pat
 
@@ -107,12 +107,12 @@ gopath/src/github.com/RangelReale/osin:
 # tests
 #
 
-test-preq: \
+get-test-deps: \
 	gopath/src/github.com/jmcvetta/napping \
 	gopath/src/github.com/yookoala/restit \
 	gopath/src/github.com/skratchdot/open-golang/open
 
-bin/integration_test: test-preq
+bin/integration_test: get-test-deps
 	@echo "Build Integration Test"
 	@echo "======================"
 	cd tests; go build -o ${BIN}/integration_test
@@ -127,4 +127,4 @@ gopath/src/github.com/jmcvetta/napping:
 gopath/src/github.com/skratchdot/open-golang/open:
 	go get github.com/skratchdot/open-golang/open
 
-.PHONY: test-preq bin/integration_test
+.PHONY: get-test-deps bin/integration_test
