@@ -86,3 +86,9 @@ func (h *UserSkillRest) Entity() service.EntityPtr {
 func (h *UserSkillRest) EntityList() service.EntityListPtr {
 	return &[]data.UserSkill{}
 }
+
+// get the length of a given pointer
+func (h *UserSkillRest) EntityListLen(p service.EntityListPtr) int {
+	l := p.(*[]data.UserSkill)
+	return len(*l)
+}

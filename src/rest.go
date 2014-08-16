@@ -28,6 +28,10 @@ type PatRestHelper interface {
 	// allocate memory of a slice of entity and return address
 	EntityList() service.EntityListPtr
 
+	// test the length of the content in a
+	// given service.EntityListPtr
+	EntityListLen(service.EntityListPtr) int
+
 	// allocate storage service for CURD operations
 	Service(s session.Session) service.Service
 
@@ -93,6 +97,10 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 		if err != nil {
 			RestError(w, err)
 			return
+		}
+
+		if h.EntityListLen(el) == 0 {
+			w.WriteHeader(404) // not found
 		}
 
 		json.NewEncoder(w).Encode(data.Resp{
@@ -163,6 +171,7 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 			return
 		}
 
+		w.WriteHeader(201) // created
 		json.NewEncoder(w).Encode(data.Resp{
 			Status: "OK",
 			Result: []interface{}{e},
@@ -242,6 +251,7 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 		}
 
 		// remove all results from database
+		w.WriteHeader(404) // not found
 		json.NewEncoder(w).Encode(data.Resp{
 			Status: "OK",
 			Result: el,
