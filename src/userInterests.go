@@ -18,6 +18,13 @@ type UserInterestRest struct {
 // check the session and see if it has the access
 // that is required
 func (h *UserInterestRest) CheckAccess(access string, sess session.Session, ref interface{}) (err error) {
+	u := sess.GetUser()
+	if u == nil {
+		err = service.Errorf(403, "Authentication Required")
+	}
+	if !sess.HasScope("user_interests") {
+		err = service.Errorf(403, "Lack the Required Scope")
+	}
 	return
 }
 

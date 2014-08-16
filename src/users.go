@@ -22,6 +22,9 @@ func (h *UserRest) CheckAccess(access string, sess session.Session, ref interfac
 	if u == nil {
 		err = service.Errorf(403, "Authentication Required")
 	}
+	if !sess.HasScope("user") {
+		err = service.Errorf(403, "Lack the Required Scope")
+	}
 	return
 }
 
