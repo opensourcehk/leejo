@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/yookoala/restit"
 	"leejo/data"
-	"log"
 )
 
 type SkillResp struct {
@@ -96,41 +95,51 @@ func testUserSkills(token string, userId int64) (err error) {
 
 	// -- Test Create --
 	test.Create(&toCreate).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(201). // Created
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toCreate).
 		RunOrPanic()
 	userSkillId := resp.Result[0].UserSkillId // id of the created user-skill
 
 	test.Retrieve(fmt.Sprintf("%d", userSkillId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(200). // Success
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toCreate).
 		RunOrPanic()
 
 	// -- Test Update --
 	test.Update(fmt.Sprintf("%d", userSkillId), &toUpdate).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(200). // Success
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toUpdate).
 		RunOrPanic()
 
 	test.Retrieve(fmt.Sprintf("%d", userSkillId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(200). // Success
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toUpdate).
 		RunOrPanic()
 
 	// -- Test Delete --
 	test.Delete(fmt.Sprintf("%d", userSkillId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(404). // Not Found
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toUpdate).
 		Run()
 
-	log.Printf("!!!!!!!!!!! UserSkill delete response :%#v", resp)
-
 	test.Retrieve(fmt.Sprintf("%d", userSkillId)).
+		AddHeader("Authorization", "Bearer "+token).
+		ExpectStatus(404). // Not Found
 		WithResponseAs(&resp).
 		ExpectResultCount(0).
 		RunOrPanic()

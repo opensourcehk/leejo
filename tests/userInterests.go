@@ -95,39 +95,51 @@ func testUserInterests(token string, userId int64) (err error) {
 
 	// -- Test Create --
 	test.Create(&toCreate).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(201). // Created
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toCreate).
 		RunOrPanic()
 	userInterestId := resp.Result[0].UserInterestId // id of the created user-interest
 
 	test.Retrieve(fmt.Sprintf("%d", userInterestId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(200). // Success
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toCreate).
 		RunOrPanic()
 
 	// -- Test Update --
 	test.Update(fmt.Sprintf("%d", userInterestId), &toUpdate).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(200). // Success
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toUpdate).
 		RunOrPanic()
 
 	test.Retrieve(fmt.Sprintf("%d", userInterestId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(200). // Success
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toUpdate).
 		RunOrPanic()
 
 	// -- Test Delete --
 	test.Delete(fmt.Sprintf("%d", userInterestId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(404). // Not Found
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toUpdate).
-		RunOrPanic()
+		Run()
 
 	test.Retrieve(fmt.Sprintf("%d", userInterestId)).
+		AddHeader("Authorization", "Bearer "+token).
+		ExpectStatus(404). // Not Found
 		WithResponseAs(&resp).
 		ExpectResultCount(0).
 		RunOrPanic()
