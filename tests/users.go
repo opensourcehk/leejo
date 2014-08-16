@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/yookoala/restit"
 	"leejo/data"
+	"log"
 )
 
 type UserResp struct {
@@ -73,6 +74,10 @@ func (r *UserResp) Match(a interface{}, b interface{}) (err error) {
 	return
 }
 
+func (r *UserResp) Reset() {
+	r.Result = make([]data.User, 0)
+}
+
 func testUser(token string) (err error) {
 
 	var resp UserResp
@@ -94,28 +99,39 @@ func testUser(token string) (err error) {
 		RunOrPanic()
 
 	// -- Test Create --
-	test.Create(&userToCreate).
+	t := test.Create(&userToCreate).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(201). // Created
 		ExpectResultCount(1).
-		ExpectResultNth(0, &userToCreate).
-		RunOrPanic()
+		ExpectResultNth(0, &userToCreate)
+
+	log.Printf("Raw request header: %#v", t.Request.Header.Get("Authorization"))
+
+	t.RunOrPanic()
 	userId := resp.Result[0].UserId // id of the created user
 
 	test.Retrieve(fmt.Sprintf("%d", userId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(200). // Success
 		ExpectResultCount(1).
 		ExpectResultNth(0, &userToCreate).
 		RunOrPanic()
 
 	// -- Test Update --
 	test.Update(fmt.Sprintf("%d", userId), &userToUpdate).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(200). // Success
 		ExpectResultCount(1).
 		ExpectResultNth(0, &userToUpdate).
 		RunOrPanic()
 
 	test.Retrieve(fmt.Sprintf("%d", userId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(200). // Success
 		ExpectResultCount(1).
 		ExpectResultNth(0, &userToUpdate).
 		RunOrPanic()
@@ -135,13 +151,19 @@ func testUser(token string) (err error) {
 
 	// -- Test Delete --
 	test.Delete(fmt.Sprintf("%d", userId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(404). // Not Found
 		ExpectResultCount(1).
 		ExpectResultNth(0, &userToUpdate).
-		RunOrPanic()
+		Run()
+
+	log.Printf("Delete Response: %#v", resp)
 
 	test.Retrieve(fmt.Sprintf("%d", userId)).
+		AddHeader("Authorization", "Bearer "+token).
 		WithResponseAs(&resp).
+		ExpectStatus(404). // Not Found
 		ExpectResultCount(0).
 		RunOrPanic()
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/yookoala/restit"
 	"leejo/data"
+	"log"
 )
 
 type SkillResp struct {
@@ -73,6 +74,10 @@ func (r *SkillResp) Match(a interface{}, b interface{}) (err error) {
 	return
 }
 
+func (r *SkillResp) Reset() {
+	r.Result = make([]data.UserSkill, 0)
+}
+
 func testUserSkills(token string, userId int64) (err error) {
 
 	var resp SkillResp
@@ -86,7 +91,7 @@ func testUserSkills(token string, userId int64) (err error) {
 		SkillName: "Dummy Skill Updated",
 	}
 
-	test := restit.Rest("User",
+	test := restit.Rest("Skill",
 		fmt.Sprintf("http://localhost:8080/api.v1/userSkills/%d", userId))
 
 	// -- Test Create --
@@ -121,7 +126,9 @@ func testUserSkills(token string, userId int64) (err error) {
 		WithResponseAs(&resp).
 		ExpectResultCount(1).
 		ExpectResultNth(0, &toUpdate).
-		RunOrPanic()
+		Run()
+
+	log.Printf("!!!!!!!!!!! UserSkill delete response :%#v", resp)
 
 	test.Retrieve(fmt.Sprintf("%d", userSkillId)).
 		WithResponseAs(&resp).

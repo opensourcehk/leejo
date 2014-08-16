@@ -73,6 +73,10 @@ func (r *InterestResp) Match(a interface{}, b interface{}) (err error) {
 	return
 }
 
+func (r *InterestResp) Reset() {
+	r.Result = make([]data.UserInterest, 0)
+}
+
 func testUserInterests(token string, userId int64) (err error) {
 
 	var resp InterestResp
@@ -86,7 +90,7 @@ func testUserInterests(token string, userId int64) (err error) {
 		InterestName: "Dummy Interest Updated",
 	}
 
-	test := restit.Rest("User",
+	test := restit.Rest("Interest",
 		fmt.Sprintf("http://localhost:8080/api.v1/userInterests/%d", userId))
 
 	// -- Test Create --
