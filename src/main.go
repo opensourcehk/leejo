@@ -1,14 +1,9 @@
 package main
 
 import (
-	"encoding/json"
-	"flag"
-	"fmt"
-	"github.com/RangelReale/osin"
 	"github.com/gorilla/pat"
-	"io/ioutil"
-	"leejo/oauth2"
 	session "github.com/gourd/session/oauth2"
+	"leejo/oauth2"
 	"log"
 	"net/http"
 	"os"
@@ -16,38 +11,18 @@ import (
 	"upper.io/db/postgresql"
 )
 
-type config struct {
-	Db dbconfig `json:"db"`
-}
+// set initial envirnment
+func init() {
 
-type dbconfig struct {
-	Host string `json:"host"`
-	Name string `json:"name"`
-	User string `json:"user"`
-	Pass string `json:"pass"`
+	// logs to stdout
+	log.SetOutput(os.Stdout)
+
 }
 
 func main() {
 
-	// parse flags
-	confFn := flag.String("config", "config.json", "Path to config file")
-	flag.Parse()
-
-	// read the config file to conf
-	confFile, err := ioutil.ReadFile(*confFn)
-	if err != nil {
-		fmt.Printf("Failed opening config file \"%s\": %v\n", *confFn, err)
-		os.Exit(1)
-	}
-	conf := config{}
-	err = json.Unmarshal(confFile, &conf)
-	if err != nil {
-		fmt.Printf("Failed parsing config file \"%s\": %v\n", *confFn, err)
-		os.Exit(1)
-	}
-
-	// logs to stdout
-	log.SetOutput(os.Stdout)
+	// read config files
+	conf := getConfig()
 
 	// connect to database
 	var dbsettings = db.Settings{
@@ -83,19 +58,6 @@ func main() {
 		subPath:  "{id:[0-9]+}",
 	}
 
-	// oauth2 related config
-	oConf := osin.NewServerConfig()
-	oConf.AllowGetAccessRequest = true
-	oConf.AllowClientSecretInParams = true
-	oConf.AllowedAccessTypes = osin.AllowedAccessType{
-		osin.AUTHORIZATION_CODE,
-		osin.REFRESH_TOKEN,
-	}
-	oConf.AllowedAuthorizeTypes = osin.AllowedAuthorizeType{
-		osin.CODE,
-		osin.TOKEN,
-	}
-
 	// oauth2 endpoints handler
 	oStore := &oauth2.AuthStorage{
 		Db: dbs,
@@ -122,8 +84,9 @@ func main() {
 	RestOnPat(uih, sh, r)
 
 	// handle OAuth2 endpoints
-	oauth2.BindOsin("/oauth2", osin.NewServer(oConf, oStore), lh)
+	oauth2.BindOsin("/oauth2", oStore, lh)
 
+	// start the server
 	http.Handle("/", r)
 	http.ListenAndServe(":8080", nil)
 

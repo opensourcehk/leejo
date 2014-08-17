@@ -12,7 +12,23 @@ type AuthHandler interface {
 }
 
 // bind the endpoints to http server
-func BindOsin(authPath string, osinServer *osin.Server, lh AuthHandler) {
+func BindOsin(authPath string, oStore osin.Storage, lh AuthHandler) {
+
+	// oauth2 related config
+	oConf := osin.NewServerConfig()
+	oConf.AllowGetAccessRequest = true
+	oConf.AllowClientSecretInParams = true
+	oConf.AllowedAccessTypes = osin.AllowedAccessType{
+		osin.AUTHORIZATION_CODE,
+		osin.REFRESH_TOKEN,
+	}
+	oConf.AllowedAuthorizeTypes = osin.AllowedAuthorizeType{
+		osin.CODE,
+		osin.TOKEN,
+	}
+
+	// create new server
+	osinServer := osin.NewServer(oConf, oStore)
 
 	// handle OAuth2 endpoints
 	http.HandleFunc(authPath+"/authorize", func(w http.ResponseWriter, r *http.Request) {
