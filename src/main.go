@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/pat"
 	"io/ioutil"
 	"leejo/oauth2"
-	"leejo/session"
+	session "github.com/gourd/session/oauth2"
 	"log"
 	"net/http"
 	"os"

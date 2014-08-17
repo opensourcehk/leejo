@@ -36,7 +36,6 @@ check: get-deps get-test-deps
 	@cd src; go test -i; go test
 	@cd src/data; go test -i; go test
 	@cd src/oauth2; go test -i; go test
-	@cd src/session; go test -i; go test
 	@cd tests; go test -i; go test
 	@echo
 
@@ -46,7 +45,6 @@ fmt:
 	cd src; go fmt
 	cd src/data; go fmt
 	cd src/oauth2; go fmt
-	cd src/session; go fmt
 	cd tests; go fmt
 	@echo
 
@@ -68,11 +66,13 @@ bin/leejo_server: get-deps
 	cd src; go build -o ${BIN}/leejo_server
 	@echo
 
-get-deps: pat gourd-service osin upper-db-pgsql
+get-deps: pat gourd osin upper-db-pgsql
 
 pat: gopath/src/github.com/gorilla/pat
 
-gourd-service: gopath/src/github.com/gourd/service
+gourd: \
+	gopath/src/github.com/gourd/service \
+	gopath/src/github.com/gourd/session
 
 osin: gopath/src/github.com/RangelReale/osin
 
@@ -83,6 +83,9 @@ gopath/src/github.com/gorilla/pat:
 
 gopath/src/github.com/gourd/service:
 	go get github.com/gourd/service
+
+gopath/src/github.com/gourd/session:
+	go get github.com/gourd/session
 
 gopath/src/github.com/go-martini/martini:
 	go get github.com/go-martini/martini
