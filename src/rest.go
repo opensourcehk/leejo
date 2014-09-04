@@ -22,16 +22,6 @@ type PatRestHelper interface {
 	// to individual entity
 	EntityPath() string
 
-	// allocate memory of a single entity and return address
-	Entity() service.EntityPtr
-
-	// allocate memory of a slice of entity and return address
-	EntityList() service.EntityListPtr
-
-	// test the length of the content in a
-	// given service.EntityListPtr
-	EntityListLen(service.EntityListPtr) int
-
 	// allocate storage service for CURD operations
 	Service(s session.Session) service.Service
 
@@ -76,14 +66,15 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 
 	r.Get(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 
-		// allocate memory for variables
 		var err error
-		el := h.EntityList()
 
 		// get service and context
 		sess, err := sh.Session(r)
 		s := h.Service(sess)
 		c := h.Context(sess)
+
+		// allocate memory for variables
+		el := s.AllocEntityList()
 
 		// retrieve all of entities in context c
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
@@ -99,7 +90,7 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 			return
 		}
 
-		if h.EntityListLen(el) == 0 {
+		if s.Len(el) == 0 {
 			w.WriteHeader(404) // not found
 		}
 
@@ -110,14 +101,15 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 	})
 	r.Get(h.BasePath(), func(w http.ResponseWriter, r *http.Request) {
 
-		// allocate memory for variables
 		var err error
-		el := h.EntityList()
 
 		// get service and context
 		sess, err := sh.Session(r)
 		s := h.Service(sess)
 		c := h.Context(sess)
+
+		// allocate memory for variables
+		el := s.AllocEntityList()
 
 		// check access
 		err = h.CheckAccess("list", sess, c.GetParentKey())
@@ -142,12 +134,14 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 
 		// allocate memory for variables
 		var err error
-		e := h.Entity()
 
 		// get service and context
 		sess, err := sh.Session(r)
 		s := h.Service(sess)
 		c := h.Context(sess)
+
+		// allocate memory for variables
+		e := s.AllocEntity()
 
 		// TODO: find a way to enforce parent key
 		err = json.NewDecoder(r.Body).Decode(e)
@@ -179,15 +173,16 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 	})
 	r.Put(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 
-		// allocate memory for variables
 		var err error
-		e := h.Entity()
-		el := h.EntityList()
 
 		// get service and context
 		sess, err := sh.Session(r)
 		s := h.Service(sess)
 		c := h.Context(sess)
+
+		// allocate memory for variables
+		e := s.AllocEntity()
+		el := s.AllocEntityList()
 
 		err = json.NewDecoder(r.Body).Decode(e)
 		if err != nil {
@@ -220,14 +215,15 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 	})
 	r.Delete(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 
-		// allocate memory for variables
 		var err error
-		el := h.EntityList()
 
 		// get service and context
 		sess, err := sh.Session(r)
 		s := h.Service(sess)
 		c := h.Context(sess)
+
+		// allocate memory for variables
+		el := s.AllocEntityList()
 
 		// retrieve all entities with c.Key
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
