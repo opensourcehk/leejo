@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/pat"
 	session "github.com/gourd/session/oauth2"
 	"leejo/oauth2"
+	"leejo/rest"
 	"log"
 	"net/http"
 	"os"
@@ -78,10 +79,13 @@ func main() {
 	// gorilla pat for routing
 	r := pat.New()
 
+	// protocol
+	p := &Protocol{}
+
 	// map API to pat router
-	RestOnPat(uh, sh, r)
-	RestOnPat(ush, sh, r)
-	RestOnPat(uih, sh, r)
+	rest.Pat(uh, sh, p, r)
+	rest.Pat(ush, sh, p, r)
+	rest.Pat(uih, sh, p, r)
 
 	// handle OAuth2 endpoints
 	oauth2.BindOsin("/oauth2", oStore, lh)

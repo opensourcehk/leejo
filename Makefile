@@ -36,6 +36,7 @@ check: get-deps get-test-deps
 	@cd src; go test -i; go test
 	@cd src/data; go test -i; go test
 	@cd src/oauth2; go test -i; go test
+	@cd src/rest; go test -i; go test
 	@cd tests; go test -i; go test
 	@echo
 

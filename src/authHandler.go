@@ -6,6 +6,7 @@ import (
 	"github.com/gourd/service"
 	"github.com/gourd/session"
 	"leejo/data"
+	"leejo/rest"
 	"log"
 	"net/http"
 	"net/url"
@@ -13,7 +14,7 @@ import (
 
 // basic login and authorization handler
 type AuthHandler struct {
-	UserHandler    PatRestHelper
+	UserHandler    rest.Handler
 	SessionHandler session.Handler
 }
 

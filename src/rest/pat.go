@@ -1,68 +1,18 @@
-package main
+package rest
 
 import (
 	"encoding/json"
 	"github.com/gorilla/pat"
-	"github.com/gourd/service"
 	"github.com/gourd/session"
 	"leejo/data"
 	"log"
 	"net/http"
 )
 
-// interface of helper that provides help to create
-// a REST CURD interface
-type PatRestHelper interface {
-
-	// returns a pat readable regular expression
-	// to listing endpoint
-	BasePath() string
-
-	// returns a pat readable regular expression
-	// to individual entity
-	EntityPath() string
-
-	// allocate storage service for CURD operations
-	Service(s session.Session) service.Service
-
-	// translate an http request into a query context
-	// i.e. key, parent key, query conditions, limit, offset and etc.
-	Context(s session.Session) service.Context
-
-	// check if the session allow
-	// the kind of access to this object
-	CheckAccess(string, session.Session, interface{}) error
-}
-
-func RestError(w http.ResponseWriter, err error) {
-
-	if err == nil {
-		return
-	}
-
-	resp := data.Resp{
-		Status: "fail",
-		Code:   500,
-	}
-
-	if se, ok := err.(service.EntityError); ok {
-		resp.Code = se.Code()
-		resp.Message = se.Error()
-	} else {
-		resp.Message = "Internal Server Error"
-	}
-
-	log.Printf("Internal Server Error: %s", err.Error())
-
-	w.WriteHeader(resp.Code)
-	json.NewEncoder(w).Encode(resp)
-
-}
-
 // create REST CURD interface with PatRestHelper and pat router
 // it knows nothing about the underlying database implementation
 // it only handles JSON communication and error handling with http client
-func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
+func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 
 	r.Get(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 
@@ -79,14 +29,14 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 		// retrieve all of entities in context c
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
 		// check access
 		err = h.CheckAccess("retrieve", sess, el)
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
@@ -114,14 +64,14 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 		// check access
 		err = h.CheckAccess("list", sess, c.GetParentKey())
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
 		// dummy limit and offset for now
 		err = s.List(c.GetKey(), el)
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
@@ -147,7 +97,7 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 		err = json.NewDecoder(r.Body).Decode(e)
 		if err != nil {
 			log.Printf("Error JSON Unmarshal: ", err)
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 		log.Printf("Create %#v", e)
@@ -155,13 +105,13 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 		// check access
 		err = h.CheckAccess("create", sess, nil)
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
 		err = s.Create(c, e)
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
@@ -187,7 +137,7 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 		err = json.NewDecoder(r.Body).Decode(e)
 		if err != nil {
 			log.Printf("Error JSON Unmarshal: ", err)
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 		log.Printf("Update %#v with %#v", c, e)
@@ -195,14 +145,14 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 		// retrieve all entities with c.Key
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
 		// check access
 		err = h.CheckAccess("update", sess, el)
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
@@ -228,21 +178,21 @@ func RestOnPat(h PatRestHelper, sh session.Handler, r *pat.Router) {
 		// retrieve all entities with c.Key
 		err = s.Retrieve(c.GetKey(), c.GetParentKey(), el)
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
 		// check access
 		err = h.CheckAccess("delete", sess, el)
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
 		// delete the item
 		err = s.Delete(c.GetKey(), c.GetParentKey())
 		if err != nil {
-			RestError(w, err)
+			Error(w, err)
 			return
 		}
 
