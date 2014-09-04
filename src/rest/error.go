@@ -1,34 +1,33 @@
 package rest
 
 import (
-	"encoding/json"
-	"github.com/gourd/service"
-	"leejo/data"
+	"github.com/gourd/session"
 	"log"
 	"net/http"
 )
 
-func Error(w http.ResponseWriter, err error) {
+// general rest error interface
+type Error interface {
+	GetCode() int
+}
 
-	if err == nil {
-		return
-	}
+// write error to response
+func WriteError(w http.ResponseWriter, sess session.Session, p Protocol, err error) {
 
-	resp := data.Resp{
-		Status: "fail",
-		Code:   500,
-	}
-
-	if se, ok := err.(service.EntityError); ok {
-		resp.Code = se.Code()
-		resp.Message = se.Error()
-	} else {
-		resp.Message = "Internal Server Error"
-	}
-
+	// log error first
 	log.Printf("Internal Server Error: %s", err.Error())
 
-	w.WriteHeader(resp.Code)
-	json.NewEncoder(w).Encode(resp)
+	// get error by protocol
+	pErr := p.Error(sess, err)
+
+	// write header code
+	if rErr, ok := pErr.(Error); ok {
+		w.WriteHeader(rErr.GetCode())
+	} else {
+		w.WriteHeader(500)
+	}
+
+	// use protocol to encode
+	p.NewEncoder(sess, w).Encode(pErr)
 
 }

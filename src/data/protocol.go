@@ -6,3 +6,7 @@ type Resp struct {
 	Message string      `json:"message,omitempty"`
 	Result  interface{} `json:"result,omitempty"`
 }
+
+func (r *Resp) GetCode() int {
+	return r.Code
+}
