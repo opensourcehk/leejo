@@ -63,6 +63,16 @@ func (h *UserRest) Service(s session.Session) service.Service {
 		ListCondFunc: func(pk service.ParentKey) service.Conds {
 			return service.NewConds().SetLimit(20)
 		},
+		EntityFunc: func() service.EntityPtr {
+			return &data.User{}
+		},
+		EntityListFunc: func() service.EntityListPtr {
+			return &[]data.User{}
+		},
+		LenFunc: func(p service.EntityListPtr) int64 {
+			l := p.(*[]data.User)
+			return int64(len(*l))
+		},
 	}
 }
 
@@ -76,20 +86,4 @@ func (h *UserRest) Context(s session.Session) service.Context {
 		ParentKey: nil,
 		Conds:     c,
 	}
-}
-
-// allocate an entity and return the address
-func (h *UserRest) Entity() service.EntityPtr {
-	return &data.User{}
-}
-
-// allocate a slice of entity and return the address
-func (h *UserRest) EntityList() service.EntityListPtr {
-	return &[]data.User{}
-}
-
-// get the length of a given pointer
-func (h *UserRest) EntityListLen(p service.EntityListPtr) int {
-	l := p.(*[]data.User)
-	return len(*l)
 }

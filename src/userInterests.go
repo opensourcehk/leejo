@@ -68,6 +68,16 @@ func (h *UserInterestRest) Service(s session.Session) service.Service {
 				SetLimit(20)
 			return c
 		},
+		EntityFunc: func() service.EntityPtr {
+			return &data.UserInterest{}
+		},
+		EntityListFunc: func() service.EntityListPtr {
+			return &[]data.UserInterest{}
+		},
+		LenFunc: func(p service.EntityListPtr) int64 {
+			l := p.(*[]data.UserInterest)
+			return int64(len(*l))
+		},
 	}
 }
 

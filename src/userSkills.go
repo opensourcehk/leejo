@@ -68,6 +68,16 @@ func (h *UserSkillRest) Service(s session.Session) service.Service {
 				SetLimit(20)
 			return c
 		},
+		EntityFunc: func() service.EntityPtr {
+			return &data.UserSkill{}
+		},
+		EntityListFunc: func() service.EntityListPtr {
+			return &[]data.UserSkill{}
+		},
+		LenFunc: func(p service.EntityListPtr) int64 {
+			l := p.(*[]data.UserSkill)
+			return int64(len(*l))
+		},
 	}
 }
 
@@ -82,20 +92,4 @@ func (h *UserSkillRest) Context(s session.Session) service.Context {
 		ParentKey: q.Get(":user_id"),
 		Conds:     c,
 	}
-}
-
-// allocate an entity and return the address
-func (h *UserSkillRest) Entity() service.EntityPtr {
-	return &data.UserSkill{}
-}
-
-// allocate a slice of entity and return the address
-func (h *UserSkillRest) EntityList() service.EntityListPtr {
-	return &[]data.UserSkill{}
-}
-
-// get the length of a given pointer
-func (h *UserSkillRest) EntityListLen(p service.EntityListPtr) int {
-	l := p.(*[]data.UserSkill)
-	return len(*l)
 }
