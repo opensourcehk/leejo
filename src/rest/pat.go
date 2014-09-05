@@ -3,7 +3,6 @@ package rest
 import (
 	"github.com/gorilla/pat"
 	"github.com/gourd/session"
-	"leejo/data"
 	"log"
 	"net/http"
 )
@@ -43,10 +42,7 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 			w.WriteHeader(404) // not found
 		}
 
-		p.NewEncoder(sess, w).Encode(data.Resp{
-			Status: "OK",
-			Result: el,
-		})
+		p.NewEncoder(sess, w).Encode(p.Response(sess, el))
 	})
 	r.Get(h.BasePath(), func(w http.ResponseWriter, r *http.Request) {
 
@@ -74,10 +70,7 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 			return
 		}
 
-		p.NewEncoder(sess, w).Encode(data.Resp{
-			Status: "OK",
-			Result: el,
-		})
+		p.NewEncoder(sess, w).Encode(p.Response(sess, el))
 	})
 	r.Post(h.BasePath(), func(w http.ResponseWriter, r *http.Request) {
 
@@ -115,10 +108,7 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 		}
 
 		w.WriteHeader(201) // created
-		p.NewEncoder(sess, w).Encode(data.Resp{
-			Status: "OK",
-			Result: []interface{}{e},
-		})
+		p.NewEncoder(sess, w).Encode(p.Response(sess, []interface{}{e}))
 	})
 	r.Put(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 
@@ -157,10 +147,7 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 
 		s.Update(c.GetKey(), c.GetParentKey(), e)
 
-		p.NewEncoder(sess, w).Encode(data.Resp{
-			Status: "OK",
-			Result: []interface{}{e},
-		})
+		p.NewEncoder(sess, w).Encode(p.Response(sess, []interface{}{e}))
 	})
 	r.Delete(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 
@@ -197,9 +184,6 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 
 		// remove all results from database
 		w.WriteHeader(404) // not found
-		p.NewEncoder(sess, w).Encode(data.Resp{
-			Status: "OK",
-			Result: el,
-		})
+		p.NewEncoder(sess, w).Encode(p.Response(sess, el))
 	})
 }
