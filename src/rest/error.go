@@ -29,7 +29,7 @@ func WriteError(w http.ResponseWriter, sess session.Session, p Protocol, err err
 	log.Printf("Internal Server Error: %s", err.Error())
 
 	// get error by protocol
-	pErr := p.Error(sess, err)
+	pErr := p.WrapError(sess, err)
 
 	// write header code
 	if rErr, ok := pErr.(Error); ok {

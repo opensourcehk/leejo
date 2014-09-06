@@ -8,10 +8,10 @@ import (
 // generic protocol interface
 type Protocol interface{
 	// wrap the response with any protocol structure
-	Response(s session.Session, r interface{}) interface{}
+	WrapResponse(s session.Session, r interface{}) interface{}
 
 	// wrap the response with any error structure
-	Error(s session.Session, e error) interface{}
+	WrapError(s session.Session, e error) interface{}
 
 	// switch the encoder with session
 	NewEncoder(s session.Session, w io.Writer) Encoder

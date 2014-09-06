@@ -27,7 +27,7 @@ func (r *DefaultResponse) GetCode() int {
 func WriteResponse(w http.ResponseWriter, sess session.Session, p Protocol, r interface{}, c int) {
 
 	// get response by protocol
-	pr := p.Response(sess, r)
+	pr := p.WrapResponse(sess, r)
 
 	// try to retrieve status code from protocol
 	if prr, ok := pr.(Response); ok {

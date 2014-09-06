@@ -13,14 +13,14 @@ import (
 type Protocol struct {
 }
 
-func (p *Protocol) Response(s session.Session, r interface{}) interface{} {
+func (p *Protocol) WrapResponse(s session.Session, r interface{}) interface{} {
 	return &data.Resp{
 		Status: "OK",
 		Result: r,
 	}
 }
 
-func (p *Protocol) Error(s session.Session, err error) interface{} {
+func (p *Protocol) WrapError(s session.Session, err error) interface{} {
 	if err == nil {
 		return nil
 	}
