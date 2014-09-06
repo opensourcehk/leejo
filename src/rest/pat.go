@@ -38,11 +38,14 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 			return
 		}
 
+		// determine the status by query result
+		status := http.StatusOK
 		if s.Len(el) == 0 {
-			w.WriteHeader(404) // not found
+			status = http.StatusNotFound
 		}
 
-		p.NewEncoder(sess, w).Encode(p.Response(sess, el))
+		// write response with proper status code
+		WriteResponse(w, sess, p, el, status)
 	})
 	r.Get(h.BasePath(), func(w http.ResponseWriter, r *http.Request) {
 
@@ -70,7 +73,8 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 			return
 		}
 
-		p.NewEncoder(sess, w).Encode(p.Response(sess, el))
+		// write response with status "ok"
+		WriteResponse(w, sess, p, el, http.StatusOK)
 	})
 	r.Post(h.BasePath(), func(w http.ResponseWriter, r *http.Request) {
 
@@ -101,14 +105,15 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 			return
 		}
 
+		// create the entity
 		err = s.Create(c, e)
 		if err != nil {
 			WriteError(w, sess, p, err)
 			return
 		}
 
-		w.WriteHeader(201) // created
-		p.NewEncoder(sess, w).Encode(p.Response(sess, []interface{}{e}))
+		// write response with status "created"
+		WriteResponse(w, sess, p, []interface{}{e}, http.StatusCreated)
 	})
 	r.Put(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 
@@ -145,9 +150,11 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 			return
 		}
 
+		// update the entity
 		s.Update(c.GetKey(), c.GetParentKey(), e)
 
-		p.NewEncoder(sess, w).Encode(p.Response(sess, []interface{}{e}))
+		// write response with status "ok"
+		WriteResponse(w, sess, p, []interface{}{e}, http.StatusOK)
 	})
 	r.Delete(h.EntityPath(), func(w http.ResponseWriter, r *http.Request) {
 
@@ -183,7 +190,7 @@ func Pat(h Handler, sh session.Handler, p Protocol, r *pat.Router) {
 		}
 
 		// remove all results from database
-		w.WriteHeader(404) // not found
-		p.NewEncoder(sess, w).Encode(p.Response(sess, el))
+		// then report "not found" to client
+		WriteResponse(w, sess, p, el, http.StatusNotFound)
 	})
 }
