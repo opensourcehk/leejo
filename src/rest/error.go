@@ -11,6 +11,17 @@ type Error interface {
 	GetCode() int
 }
 
+// default implementation of Error interface
+type DefaultError struct {
+	Status  string      `json:"status"`
+	Code    int         `json:"code,omitempty"`
+}
+
+// implement Error interface GetCode method
+func (e *DefaultError) GetCode() int {
+	return e.Code
+}
+
 // write error to response
 func WriteError(w http.ResponseWriter, sess session.Session, p Protocol, err error) {
 
