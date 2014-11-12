@@ -1,4 +1,4 @@
-package oauth2
+package data
 
 import (
 	"github.com/RangelReale/osin"
@@ -6,13 +6,13 @@ import (
 )
 
 // database adapted struct
-type apiClient struct {
+type ApiClient struct {
 	Id          string `db:"id"`
 	Secret      string `db:"secret"`
 	RedirectUri string `db:"redirect_uri"`
 }
 
-func (c *apiClient) ToOsin() osin.Client {
+func (c *ApiClient) ToOsin() osin.Client {
 	return &osin.DefaultClient{
 		Id:          c.Id,
 		Secret:      c.Secret,
@@ -21,21 +21,21 @@ func (c *apiClient) ToOsin() osin.Client {
 }
 
 // User interface
-type User interface {
+type ApiUser interface {
 	GetId() int64
 }
 
 // implementation for User interface
-type apiAuthUser struct {
+type ApiAuthUser struct {
 	Id int64
 }
 
-func (u *apiAuthUser) GetId() int64 {
+func (u *ApiAuthUser) GetId() int64 {
 	return u.Id
 }
 
 // database adapted struct
-type apiAuthData struct {
+type ApiAuthData struct {
 	Id          int64  `db:"id,omitempty"`
 	Code        string `db:"code"`
 	UserId      int64  `db:"user_id"`
@@ -47,7 +47,7 @@ type apiAuthData struct {
 	Expired     int64  `db:"expired_timestamp"`
 }
 
-func (d *apiAuthData) FromOsin(od *osin.AuthorizeData) *apiAuthData {
+func (d *ApiAuthData) FromOsin(od *osin.AuthorizeData) *ApiAuthData {
 
 	// attempt to case userdata
 	if user, ok := od.UserData.(User); ok {
@@ -64,7 +64,7 @@ func (d *apiAuthData) FromOsin(od *osin.AuthorizeData) *apiAuthData {
 	return d
 }
 
-func (d *apiAuthData) ToOsin() (od *osin.AuthorizeData) {
+func (d *ApiAuthData) ToOsin() (od *osin.AuthorizeData) {
 	od = &osin.AuthorizeData{
 		Code: d.Code,
 		Client: &osin.DefaultClient{
@@ -75,7 +75,7 @@ func (d *apiAuthData) ToOsin() (od *osin.AuthorizeData) {
 		RedirectUri: d.RedirectUri,
 		ExpiresIn:   int32(d.Expired - time.Now().Unix()),
 		CreatedAt:   time.Unix(d.Created, 0),
-		UserData: &apiAuthUser{
+		UserData: &ApiAuthUser{
 			Id: d.UserId,
 		},
 	}
@@ -83,7 +83,7 @@ func (d *apiAuthData) ToOsin() (od *osin.AuthorizeData) {
 }
 
 // database adapted struct
-type apiAccess struct {
+type ApiAccess struct {
 	Id           int64  `db:"id,omitempty"`
 	AccessToken  string `db:"access_token"`
 	RefreshToken string `db:"refresh_token"`
@@ -94,7 +94,7 @@ type apiAccess struct {
 	Expired      int64  `db:"expired_timestamp"`
 }
 
-func (d *apiAccess) FromOsin(od *osin.AccessData) *apiAccess {
+func (d *ApiAccess) FromOsin(od *osin.AccessData) *ApiAccess {
 
 	// attempt to case userdata
 	if user, ok := od.UserData.(User); ok {
@@ -110,7 +110,7 @@ func (d *apiAccess) FromOsin(od *osin.AccessData) *apiAccess {
 	return d
 }
 
-func (d *apiAccess) ToOsin() (od *osin.AccessData) {
+func (d *ApiAccess) ToOsin() (od *osin.AccessData) {
 	od = &osin.AccessData{
 		AccessToken:  d.AccessToken,
 		RefreshToken: d.RefreshToken,
@@ -120,7 +120,7 @@ func (d *apiAccess) ToOsin() (od *osin.AccessData) {
 		Scope:     d.Scope,
 		ExpiresIn: int32(d.Expired - time.Now().Unix()),
 		CreatedAt: time.Unix(d.Created, 0),
-		UserData: &apiAuthUser{
+		UserData: &ApiAuthUser{
 			Id: d.UserId,
 		},
 	}

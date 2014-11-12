@@ -3,6 +3,7 @@ package oauth2
 import (
 	"github.com/RangelReale/osin"
 	"github.com/gourd/session"
+	"leejo/data"
 	"log"
 	"upper.io/db"
 )
@@ -27,7 +28,7 @@ func (a *AuthStorage) GetClient(id string) (c osin.Client, err error) {
 	cc, err := a.Db.Collection("leejo_api_client")
 	res := cc.Find(db.Cond{"id": id})
 
-	var cs []apiClient
+	var cs []data.ApiClient
 	err = res.All(&cs)
 	log.Printf("GetClient: %s: %#v\n", id, cs)
 	if err != nil {
@@ -49,7 +50,7 @@ func (a *AuthStorage) SaveAuthorize(d *osin.AuthorizeData) (err error) {
 	if err != nil {
 		return
 	}
-	dd := (&apiAuthData{}).FromOsin(d)
+	dd := (&data.ApiAuthData{}).FromOsin(d)
 	log.Printf("SaveAuthorize: %#v\n", dd)
 	_, err = ac.Append(dd)
 	return
@@ -65,7 +66,7 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 		return
 	}
 
-	ds := []apiAuthData{}
+	ds := []data.ApiAuthData{}
 	res := ac.Find(db.Cond{
 		"code": code,
 	})
@@ -118,7 +119,7 @@ func (a *AuthStorage) SaveAccess(ad *osin.AccessData) (err error) {
 	if err != nil {
 		return
 	}
-	dd := (&apiAccess{}).FromOsin(ad)
+	dd := (&data.ApiAccess{}).FromOsin(ad)
 	log.Printf("SaveAuthorize adapted: %#v\n", dd)
 	_, err = ac.Append(dd)
 	return
@@ -134,7 +135,7 @@ func (a *AuthStorage) LoadAccess(token string) (d *osin.AccessData, err error) {
 		return
 	}
 
-	ds := []apiAccess{}
+	ds := []data.ApiAccess{}
 	res := ac.Find(db.Cond{
 		"access_token": token,
 	})
@@ -187,7 +188,7 @@ func (a *AuthStorage) LoadRefresh(token string) (d *osin.AccessData, err error) 
 		return
 	}
 
-	ds := []apiAccess{}
+	ds := []data.ApiAccess{}
 	res := ac.Find(db.Cond{
 		"refresh_token": token,
 	})
