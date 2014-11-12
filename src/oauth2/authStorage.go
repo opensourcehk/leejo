@@ -2,13 +2,17 @@ package oauth2
 
 import (
 	"github.com/RangelReale/osin"
+	"github.com/gourd/session"
 	"log"
 	"upper.io/db"
 )
 
 // storage struct to fulfill osin interface
 type AuthStorage struct {
-	Db db.Database
+	S       session.Session
+	ClientP ServiceProvider
+	AuthP   ServiceProvider
+	Db      db.Database
 }
 
 func (a *AuthStorage) Clone() osin.Storage {

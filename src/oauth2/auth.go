@@ -33,6 +33,10 @@ func BindOsin(authPath string, oStore osin.Storage, lh AuthHandler) {
 	// handle OAuth2 endpoints
 	http.HandleFunc(authPath+"/authorize", func(w http.ResponseWriter, r *http.Request) {
 		resp := osinServer.NewResponse()
+
+		// TODO: start a gourd session
+		// TODO: pass the gourd session and session handler to the resp.Server
+
 		if ar := osinServer.HandleAuthorizeRequest(resp, r); ar != nil {
 			// handle login page
 			if err := lh.HandleLogin(ar, w, r); err != nil {
@@ -51,6 +55,9 @@ func BindOsin(authPath string, oStore osin.Storage, lh AuthHandler) {
 	http.HandleFunc(authPath+"/token", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Access token endpoint")
 		resp := osinServer.NewResponse()
+
+		// TODO: start a gourd session
+		// TODO: pass the gourd session and session handler to the resp.Server
 
 		// ugly hack to accept GET request in token endpoint
 		// should add this to osin
