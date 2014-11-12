@@ -1,4 +1,4 @@
-package oauth2
+package main
 
 import (
 	"github.com/gourd/service"
@@ -8,12 +8,12 @@ import (
 	"upper.io/db"
 )
 
-type ClientProvider struct {
+type oauth2Provider struct {
 	Db db.Database
 }
 
 // allocate storage service for CURD operations of user
-func (p *ClientProvider) Service(s session.Session) service.Service {
+func (p *oauth2Provider) Client(s session.Session) service.Service {
 	// the content of service would be database specific
 	// but the interface of service would be generic
 	return &upperio.Service{
@@ -30,13 +30,12 @@ func (p *ClientProvider) Service(s session.Session) service.Service {
 		},
 		KeyCondFunc: func(k service.Key, pk service.ParentKey) service.Conds {
 			c := service.NewConds().
-				Add("user_id", pk).
-				Add("user_interest_id", k)
+				Add("id", k)
 			return c
 		},
 		ListCondFunc: func(pk service.ParentKey) service.Conds {
 			c := service.NewConds().
-				Add("user_id", pk).
+				Add("id", pk).
 				SetLimit(20)
 			return c
 		},
@@ -53,3 +52,29 @@ func (p *ClientProvider) Service(s session.Session) service.Service {
 	}
 }
 
+// allocate storage service for CURD operations of user
+func (p *oauth2Provider) Auth(s session.Session) service.Service {
+	// the content of service would be database specific
+	// but the interface of service would be generic
+	return &upperio.Service{
+	// placeholder only, for now
+	}
+}
+
+// allocate storage service for CURD operations of user
+func (p *oauth2Provider) Access(s session.Session) service.Service {
+	// the content of service would be database specific
+	// but the interface of service would be generic
+	return &upperio.Service{
+	// placeholder only, for now
+	}
+}
+
+// allocate storage service for CURD operations of user
+func (p *oauth2Provider) Refresh(s session.Session) service.Service {
+	// the content of service would be database specific
+	// but the interface of service would be generic
+	return &upperio.Service{
+	// placeholder only, for now
+	}
+}
