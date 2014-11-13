@@ -61,11 +61,6 @@ func main() {
 
 	// oauth2 endpoints handler
 	oStore := &oauth2.AuthStorage{
-
-		// TODO: should phase out this parameter and
-		//       let service provider take over
-		Db: dbs,
-
 		// provides services related to oauth2
 		P: &oauth2Provider{
 			Db: dbs,

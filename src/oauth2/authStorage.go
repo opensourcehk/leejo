@@ -6,14 +6,12 @@ import (
 	"github.com/gourd/session"
 	"leejo/data"
 	"log"
-	"upper.io/db"
 )
 
 // storage struct to fulfill osin interface
 type AuthStorage struct {
 	S  session.Session
 	P  ServiceProvider
-	Db db.Database
 }
 
 func (a *AuthStorage) SetSession(s session.Session) {
@@ -29,7 +27,6 @@ func (a *AuthStorage) Clone() (c osin.Storage) {
 	c = &AuthStorage{
 		S:  a.S,
 		P:  a.P,
-		Db: a.Db,
 	}
 	return
 }
