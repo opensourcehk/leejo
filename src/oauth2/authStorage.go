@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"github.com/RangelReale/osin"
+	"github.com/gourd/service"
 	"github.com/gourd/session"
 	"leejo/data"
 	"log"
@@ -63,13 +64,11 @@ func (a *AuthStorage) GetClient(id string) (c osin.Client, err error) {
 // SaveAuthorize saves authorize data.
 func (a *AuthStorage) SaveAuthorize(d *osin.AuthorizeData) (err error) {
 	log.Printf("SaveAuthorize: %#v\n", d)
-	ac, err := a.Db.Collection("leejo_api_authdata")
-	if err != nil {
-		return
-	}
+	s := a.P.AuthService(a.S)
 	dd := (&data.ApiAuthData{}).FromOsin(d)
 	log.Printf("SaveAuthorize: %#v\n", dd)
-	_, err = ac.Append(dd)
+	c := &service.BasicContext{}
+	err = s.Create(c, dd)
 	return
 }
 
@@ -77,27 +76,25 @@ func (a *AuthStorage) SaveAuthorize(d *osin.AuthorizeData) (err error) {
 // Client information MUST be loaded together.
 // Optionally can return error if expired.
 func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err error) {
-	log.Printf("LoadAuthorize: %s\n", code)
-	ac, err := a.Db.Collection("leejo_api_authdata")
-	if err != nil {
-		return
-	}
 
-	ds := []data.ApiAuthData{}
-	res := ac.Find(db.Cond{
-		"code": code,
-	})
-	err = res.All(&ds)
-	log.Printf("AuthData retrieved: %s: %#v\n", code, ds)
-	if err != nil {
-		return
-	}
+	log.Printf("LoadAuthorize: %s\n", code)
+	s := a.P.AuthService(a.S)
+
+	// allocate memory for variables
+	el := s.AllocEntityList()
+
+	// find all of entities with the code
+	cond := service.NewConds().Add("code", code)
+	s.Search(cond, el)
 
 	// get authdata
-	if len(ds) == 0 {
+	if s.Len(el) == 0 {
 		return
 	}
-	d = ds[0].ToOsin()
+
+	l := el.(*[]data.ApiAuthData)
+	d = (*l)[0].ToOsin()
+
 	log.Printf("AuthData.ToOsin: %#v\n", d)
 
 	// also load api client data
@@ -115,16 +112,22 @@ func (a *AuthStorage) LoadAuthorize(code string) (d *osin.AuthorizeData, err err
 // RemoveAuthorize revokes or deletes the authorization code.
 func (a *AuthStorage) RemoveAuthorize(code string) (err error) {
 	log.Printf("RemoveAuthorize: %s\n", code)
-	ac, err := a.Db.Collection("leejo_api_authdata")
-	if err != nil {
+	s := a.P.AuthService(a.S)
+
+	// allocate memory for variables
+	el := s.AllocEntityList()
+	var al *[]data.ApiAuthData
+	al = el.(*[]data.ApiAuthData)
+
+	// search for AuthData
+	cond := service.NewConds().Add("code", code)
+	s.Search(cond, el)
+	if s.Len(el) == 0 {
 		return
 	}
 
-	res := ac.Find(db.Cond{
-		"code": code,
-	})
-	err = res.Remove()
-
+	// delete the AuthData
+	err = s.Delete((*al)[0].Id, nil)
 	return
 }
 
