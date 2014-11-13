@@ -96,7 +96,37 @@ func (p *oauth2Provider) AccessService(s session.Session) service.Service {
 	// the content of service would be database specific
 	// but the interface of service would be generic
 	return &upperio.Service{
-	// placeholder only, for now
+		Db:       p.Db,
+		CollName: "leejo_api_access",
+		IdSetterFunc: func(id upperio.Id, e service.EntityPtr) (err error) {
+			d := e.(*data.ApiAccess)
+			d.Id = id.(int64)
+			return
+		},
+		CountFunc: func(el service.EntityListPtr) uint64 {
+			l := el.(*[]data.ApiAccess)
+			return uint64(len(*l))
+		},
+		KeyCondFunc: func(k service.Key, pk service.ParentKey) service.Conds {
+			c := service.NewConds().
+				Add("code", k)
+			return c
+		},
+		ListCondFunc: func(pk service.ParentKey) service.Conds {
+			c := service.NewConds().
+				Add("code", pk)
+			return c
+		},
+		EntityFunc: func() service.EntityPtr {
+			return &data.ApiAccess{}
+		},
+		EntityListFunc: func() service.EntityListPtr {
+			return &[]data.ApiAccess{}
+		},
+		LenFunc: func(p service.EntityListPtr) int64 {
+			l := p.(*[]data.ApiAccess)
+			return int64(len(*l))
+		},
 	}
 }
 

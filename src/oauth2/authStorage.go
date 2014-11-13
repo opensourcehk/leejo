@@ -135,13 +135,11 @@ func (a *AuthStorage) RemoveAuthorize(code string) (err error) {
 // If RefreshToken is not blank, it must save in a way that can be loaded using LoadRefresh.
 func (a *AuthStorage) SaveAccess(ad *osin.AccessData) (err error) {
 	log.Printf("SaveAccess: %#v\n", ad)
-	ac, err := a.Db.Collection("leejo_api_access")
-	if err != nil {
-		return
-	}
+	s := a.P.AccessService(a.S)
 	dd := (&data.ApiAccess{}).FromOsin(ad)
-	log.Printf("SaveAuthorize adapted: %#v\n", dd)
-	_, err = ac.Append(dd)
+	log.Printf("SaveAccess: %#v\n", dd)
+	c := &service.BasicContext{}
+	err = s.Create(c, dd)
 	return
 }
 
@@ -149,27 +147,25 @@ func (a *AuthStorage) SaveAccess(ad *osin.AccessData) (err error) {
 // AuthorizeData and AccessData DON'T NEED to be loaded if not easily available.
 // Optionally can return error if expired.
 func (a *AuthStorage) LoadAccess(token string) (d *osin.AccessData, err error) {
+
 	log.Printf("LoadAccess: %s\n", token)
-	ac, err := a.Db.Collection("leejo_api_access")
-	if err != nil {
+	s := a.P.AccessService(a.S)
+
+	// allocate memory for variables
+	el := s.AllocEntityList()
+
+	// find all of entities with the code
+	cond := service.NewConds().Add("access_token", token)
+	s.Search(cond, el)
+
+	// get access data
+	if s.Len(el) == 0 {
 		return
 	}
 
-	ds := []data.ApiAccess{}
-	res := ac.Find(db.Cond{
-		"access_token": token,
-	})
-	err = res.All(&ds)
-	log.Printf("Access retrieved: %s: %#v\n", token, ds)
-	if err != nil {
-		return
-	}
+	l := el.(*[]data.ApiAccess)
+	d = (*l)[0].ToOsin()
 
-	// get access
-	if len(ds) == 0 {
-		return
-	}
-	d = ds[0].ToOsin()
 	log.Printf("Access.ToOsin: %#v\n", d)
 
 	// also load api client data
@@ -184,17 +180,24 @@ func (a *AuthStorage) LoadAccess(token string) (d *osin.AccessData, err error) {
 
 // RemoveAccess revokes or deletes an AccessData.
 func (a *AuthStorage) RemoveAccess(token string) (err error) {
-	log.Printf("RemoveAccess: %s\n", token)
-	ac, err := a.Db.Collection("leejo_api_access")
-	if err != nil {
+
+	log.Printf("RemoveAuthorize: %s\n", token)
+	s := a.P.AccessService(a.S)
+
+	// allocate memory for variables
+	el := s.AllocEntityList()
+	var al *[]data.ApiAccess
+	al = el.(*[]data.ApiAccess)
+
+	// search for Access
+	cond := service.NewConds().Add("access_token", token)
+	s.Search(cond, el)
+	if s.Len(el) == 0 {
 		return
 	}
 
-	res := ac.Find(db.Cond{
-		"access_token": token,
-	})
-	err = res.Remove()
-
+	// delete the Access
+	err = s.Delete((*al)[0].Id, nil)
 	return
 }
 
@@ -202,27 +205,25 @@ func (a *AuthStorage) RemoveAccess(token string) (err error) {
 // AuthorizeData and AccessData DON'T NEED to be loaded if not easily available.
 // Optionally can return error if expired.
 func (a *AuthStorage) LoadRefresh(token string) (d *osin.AccessData, err error) {
+
 	log.Printf("LoadRefresh: %s\n", token)
-	ac, err := a.Db.Collection("leejo_api_access")
-	if err != nil {
+	s := a.P.AccessService(a.S)
+
+	// allocate memory for variables
+	el := s.AllocEntityList()
+
+	// find all of entities with the code
+	cond := service.NewConds().Add("refresh_token", token)
+	s.Search(cond, el)
+
+	// get access data
+	if s.Len(el) == 0 {
 		return
 	}
 
-	ds := []data.ApiAccess{}
-	res := ac.Find(db.Cond{
-		"refresh_token": token,
-	})
-	err = res.All(&ds)
-	log.Printf("Access (Refresh) retrieved: %s: %#v\n", token, ds)
-	if err != nil {
-		return
-	}
+	l := el.(*[]data.ApiAccess)
+	d = (*l)[0].ToOsin()
 
-	// get access
-	if len(ds) == 0 {
-		return
-	}
-	d = ds[0].ToOsin()
 	log.Printf("Access.ToOsin: %#v\n", d)
 
 	// also load api client data
@@ -237,16 +238,23 @@ func (a *AuthStorage) LoadRefresh(token string) (d *osin.AccessData, err error) 
 
 // RemoveRefresh revokes or deletes refresh AccessData.
 func (a *AuthStorage) RemoveRefresh(token string) (err error) {
+
 	log.Printf("RemoveRefresh: %s\n", token)
-	ac, err := a.Db.Collection("leejo_api_access")
-	if err != nil {
+	s := a.P.AccessService(a.S)
+
+	// allocate memory for variables
+	el := s.AllocEntityList()
+	var al *[]data.ApiAccess
+	al = el.(*[]data.ApiAccess)
+
+	// search for Access
+	cond := service.NewConds().Add("refresh_token", token)
+	s.Search(cond, el)
+	if s.Len(el) == 0 {
 		return
 	}
 
-	res := ac.Find(db.Cond{
-		"refresh_token": token,
-	})
-	err = res.Remove()
-
+	// delete the Access
+	err = s.Delete((*al)[0].Id, nil)
 	return
 }
