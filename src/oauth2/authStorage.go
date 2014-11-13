@@ -10,8 +10,8 @@ import (
 
 // storage struct to fulfill osin interface
 type AuthStorage struct {
-	S  session.Session
-	P  ServiceProvider
+	S session.Session
+	P ServiceProvider
 }
 
 func (a *AuthStorage) SetSession(s session.Session) {
@@ -25,8 +25,8 @@ func (a *AuthStorage) SetProvider(p ServiceProvider) {
 // clone the storage
 func (a *AuthStorage) Clone() (c osin.Storage) {
 	c = &AuthStorage{
-		S:  a.S,
-		P:  a.P,
+		S: a.S,
+		P: a.P,
 	}
 	return
 }

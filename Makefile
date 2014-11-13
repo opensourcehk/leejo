@@ -105,7 +105,7 @@ gopath/src/github.com/xiam/gopostgresql:
 gopath/src/menteslibres.net/gosexy/to:
 	go get menteslibres.net/gosexy/to
 
-gopath/src/upper.io/db:
+gopath/src/upper.io/db: gopath/src/code.google.com/p/go-uuid/uuid
 	go get upper.io/db
 
 gopath/src/upper.io/db/postgresql:
@@ -113,6 +113,9 @@ gopath/src/upper.io/db/postgresql:
 
 gopath/src/github.com/RangelReale/osin:
 	go get github.com/RangelReale/osin
+
+gopath/src/code.google.com/p/go-uuid/uuid:
+	go get code.google.com/p/go-uuid/uuid
 
 .PHONY: pat gourd-service osin upper-db-pgsql
 
