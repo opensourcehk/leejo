@@ -25,6 +25,7 @@ test: fmt bin/integration_test
 update: clean-gopath get-deps get-test-deps
 
 clean-gopath:
+	rm -Rf gopath/pkg
 	rm -Rf gopath/src/github.com
 	rm -Rf gopath/src/code.google.com
 	rm -Rf gopath/src/menteslibres.net
@@ -50,6 +51,7 @@ fmt:
 	@echo
 
 clean:
+	rm -Rf gopath/pkg
 	rm -Rf bin/*
 
 .PHONY: all update clean-gopath serve build test check fmt clean
