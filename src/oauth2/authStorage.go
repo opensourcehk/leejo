@@ -23,9 +23,14 @@ func (a *AuthStorage) SetProvider(p ServiceProvider) {
 	a.P = p
 }
 
-func (a *AuthStorage) Clone() osin.Storage {
-	// TODO: should really clone the storage here
-	return a
+// clone the storage
+func (a *AuthStorage) Clone() (c osin.Storage) {
+	c = &AuthStorage{
+		S:  a.S,
+		P:  a.P,
+		Db: a.Db,
+	}
+	return
 }
 
 func (a *AuthStorage) Close() {
