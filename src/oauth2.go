@@ -13,7 +13,7 @@ type oauth2Provider struct {
 }
 
 // allocate storage service for CURD operations of user
-func (p *oauth2Provider) Client(s session.Session) service.Service {
+func (p *oauth2Provider) ClientService(s session.Session) service.Service {
 	// the content of service would be database specific
 	// but the interface of service would be generic
 	return &upperio.Service{
@@ -53,7 +53,7 @@ func (p *oauth2Provider) Client(s session.Session) service.Service {
 }
 
 // allocate storage service for CURD operations of user
-func (p *oauth2Provider) Auth(s session.Session) service.Service {
+func (p *oauth2Provider) AuthService(s session.Session) service.Service {
 	// the content of service would be database specific
 	// but the interface of service would be generic
 	return &upperio.Service{
@@ -62,7 +62,7 @@ func (p *oauth2Provider) Auth(s session.Session) service.Service {
 }
 
 // allocate storage service for CURD operations of user
-func (p *oauth2Provider) Access(s session.Session) service.Service {
+func (p *oauth2Provider) AccessService(s session.Session) service.Service {
 	// the content of service would be database specific
 	// but the interface of service would be generic
 	return &upperio.Service{
@@ -71,7 +71,7 @@ func (p *oauth2Provider) Access(s session.Session) service.Service {
 }
 
 // allocate storage service for CURD operations of user
-func (p *oauth2Provider) Refresh(s session.Session) service.Service {
+func (p *oauth2Provider) RefreshService(s session.Session) service.Service {
 	// the content of service would be database specific
 	// but the interface of service would be generic
 	return &upperio.Service{

@@ -6,8 +6,8 @@ import (
 )
 
 type ServiceProvider interface {
-	Client(s session.Session) service.Service
-	Auth(s session.Session) service.Service
-	Access(s session.Session) service.Service
-	Refresh(s session.Session) service.Service
+	ClientService(s session.Session) service.Service
+	AuthService(s session.Session) service.Service
+	AccessService(s session.Session) service.Service
+	RefreshService(s session.Session) service.Service
 }
