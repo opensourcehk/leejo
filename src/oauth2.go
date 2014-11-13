@@ -129,12 +129,3 @@ func (p *oauth2Provider) AccessService(s session.Session) service.Service {
 		},
 	}
 }
-
-// allocate storage service for CURD operations of user
-func (p *oauth2Provider) RefreshService(s session.Session) service.Service {
-	// the content of service would be database specific
-	// but the interface of service would be generic
-	return &upperio.Service{
-	// placeholder only, for now
-	}
-}
