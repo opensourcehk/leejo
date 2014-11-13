@@ -38,21 +38,25 @@ func (a *AuthStorage) Close() {
 
 // GetClient loads the client by id (client_id)
 func (a *AuthStorage) GetClient(id string) (c osin.Client, err error) {
-	cc, err := a.Db.Collection("leejo_api_client")
-	res := cc.Find(db.Cond{"id": id})
+	cs := a.P.ClientService(a.S)
 
-	var cs []data.ApiClient
-	err = res.All(&cs)
+	// define entity list type
+	el := cs.AllocEntityList()
+	err = cs.Retrieve(id, nil, el)
 	log.Printf("GetClient: %s: %#v\n", id, cs)
 	if err != nil {
 		panic(err)
 	}
 
 	// if there is result, pass it out
-	if len(cs) > 0 {
-		c = cs[0].ToOsin()
+	if cs.Len(el) > 0 {
+		// this assignment is clumcy and structure dependent
+		// need to change
+		cl := el.(*[]data.ApiClient)
+		c = (*cl)[0].ToOsin()
 		log.Printf("Client Obtained: %#v\n", c)
 	}
+
 	return
 }
 
