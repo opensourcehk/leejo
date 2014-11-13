@@ -61,7 +61,15 @@ func main() {
 
 	// oauth2 endpoints handler
 	oStore := &oauth2.AuthStorage{
+
+		// TODO: should phase out this parameter and
+		//       let service provider take over
 		Db: dbs,
+
+		// provides services related to oauth2
+		P: &oauth2Provider{
+			Db: dbs,
+		},
 	}
 
 	// define session handler
@@ -88,7 +96,7 @@ func main() {
 	rest.Pat(uih, sh, p, r)
 
 	// handle OAuth2 endpoints
-	oauth2.BindOsin("/oauth2", oStore, lh)
+	oauth2.BindOsin("/oauth2", oStore, sh, lh)
 
 	// start the server
 	http.Handle("/", r)

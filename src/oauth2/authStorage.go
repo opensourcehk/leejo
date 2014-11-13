@@ -15,7 +15,16 @@ type AuthStorage struct {
 	Db db.Database
 }
 
+func (a *AuthStorage) SetSession(s session.Session) {
+	a.S = s
+}
+
+func (a *AuthStorage) SetProvider(p ServiceProvider) {
+	a.P = p
+}
+
 func (a *AuthStorage) Clone() osin.Storage {
+	// TODO: should really clone the storage here
 	return a
 }
 

@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"github.com/RangelReale/osin"
+	"github.com/gourd/session"
 	"log"
 	"net/http"
 )
@@ -12,7 +13,7 @@ type AuthHandler interface {
 }
 
 // bind the endpoints to http server
-func BindOsin(authPath string, oStore osin.Storage, lh AuthHandler) {
+func BindOsin(authPath string, oStore *AuthStorage, sh session.Handler, lh AuthHandler) {
 
 	// oauth2 related config
 	oConf := osin.NewServerConfig()
@@ -34,8 +35,14 @@ func BindOsin(authPath string, oStore osin.Storage, lh AuthHandler) {
 	http.HandleFunc(authPath+"/authorize", func(w http.ResponseWriter, r *http.Request) {
 		resp := osinServer.NewResponse()
 
-		// TODO: start a gourd session
-		// TODO: pass the gourd session and session handler to the resp.Server
+		// get service
+		sess, err := sh.Session(r)
+		if err != nil {
+			log.Printf("Internal Error: %s", resp.InternalError.Error())
+		}
+
+		// pass the gourd session and session handler to the resp.Server
+		resp.Storage.(*AuthStorage).SetSession(sess)
 
 		if ar := osinServer.HandleAuthorizeRequest(resp, r); ar != nil {
 			// handle login page
@@ -56,8 +63,14 @@ func BindOsin(authPath string, oStore osin.Storage, lh AuthHandler) {
 		log.Printf("Access token endpoint")
 		resp := osinServer.NewResponse()
 
-		// TODO: start a gourd session
-		// TODO: pass the gourd session and session handler to the resp.Server
+		// get service
+		sess, err := sh.Session(r)
+		if err != nil {
+			log.Printf("Internal Error: %s", resp.InternalError.Error())
+		}
+
+		// pass the gourd session and session handler to the resp.Server
+		resp.Storage.(*AuthStorage).SetSession(sess)
 
 		// ugly hack to accept GET request in token endpoint
 		// should add this to osin
