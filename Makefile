@@ -79,43 +79,52 @@ gourd: \
 
 osin: gopath/src/github.com/RangelReale/osin
 
-upper-db-pgsql: gopath/src/upper.io/db gopath/src/menteslibres.net/gosexy/to gopath/src/upper.io/db/postgresql gopath/src/github.com/xiam/gopostgresql
+upper-db-pgsql: \
+	gopath/src/menteslibres.net/gosexy/to \
+	gopath/src/upper.io/db/postgresql \
+	gopath/src/github.com/xiam/gopostgresql
 
 gopath/src/github.com/gorilla/pat:
-	go get github.com/gorilla/pat
+	go get -u github.com/gorilla/pat
 
 gopath/src/github.com/gourd/service:
-	go get github.com/gourd/service
+	go get -u github.com/gourd/service
 
 gopath/src/github.com/gourd/session:
-	go get github.com/gourd/session
+	go get -u github.com/gourd/session
 
 gopath/src/github.com/go-martini/martini:
-	go get github.com/go-martini/martini
+	go get -u github.com/go-martini/martini
 
 gopath/src/github.com/martini-contrib/binding:
-	go get github.com/martini-contrib/binding
+	go get -u github.com/martini-contrib/binding
 
 gopath/src/github.com/martini-contrib/render:
-	go get github.com/martini-contrib/render
+	go get -u github.com/martini-contrib/render
 
 gopath/src/github.com/xiam/gopostgresql:
-	go get github.com/xiam/gopostgresql
+	go get -u github.com/xiam/gopostgresql
 
 gopath/src/menteslibres.net/gosexy/to:
-	go get menteslibres.net/gosexy/to
+	go get -u menteslibres.net/gosexy/to
 
-gopath/src/upper.io/db: gopath/src/code.google.com/p/go-uuid/uuid
-	go get upper.io/db
+gopath/src/upper.io/db: \
+	gopath/src/upper.io/cache \
+	gopath/src/code.google.com/p/go-uuid/uuid
+	go get -u upper.io/db
 
-gopath/src/upper.io/db/postgresql:
-	go get upper.io/db/postgresql
+gopath/src/upper.io/cache:
+	go get -u upper.io/cache
+
+gopath/src/upper.io/db/postgresql: \
+	gopath/src/upper.io/db
+	go get -u upper.io/db/postgresql
 
 gopath/src/github.com/RangelReale/osin:
-	go get github.com/RangelReale/osin
+	go get -u github.com/RangelReale/osin
 
 gopath/src/code.google.com/p/go-uuid/uuid:
-	go get code.google.com/p/go-uuid/uuid
+	go get -u code.google.com/p/go-uuid/uuid
 
 .PHONY: pat gourd-service osin upper-db-pgsql
 
