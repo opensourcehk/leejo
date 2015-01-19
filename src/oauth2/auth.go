@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"github.com/RangelReale/osin"
+	"github.com/gorilla/pat"
 	"github.com/gourd/session"
 	"log"
 	"net/http"
@@ -12,8 +13,8 @@ type AuthHandler interface {
 	HandleLogin(*osin.AuthorizeRequest, http.ResponseWriter, *http.Request) error
 }
 
-// bind the endpoints to http server
-func BindOsin(authPath string, oStore *AuthStorage, sh session.Handler, lh AuthHandler) {
+// bind the endpoints to http server with pat router
+func Pat(authPath string, oStore *AuthStorage, sh session.Handler, lh AuthHandler, r *pat.Router) {
 
 	// oauth2 related config
 	oConf := osin.NewServerConfig()
@@ -32,7 +33,7 @@ func BindOsin(authPath string, oStore *AuthStorage, sh session.Handler, lh AuthH
 	osinServer := osin.NewServer(oConf, oStore)
 
 	// handle OAuth2 endpoints
-	http.HandleFunc(authPath+"/authorize", func(w http.ResponseWriter, r *http.Request) {
+	authEndpointFunc := func(w http.ResponseWriter, r *http.Request) {
 		resp := osinServer.NewResponse()
 
 		// get service
@@ -58,8 +59,10 @@ func BindOsin(authPath string, oStore *AuthStorage, sh session.Handler, lh AuthH
 		}
 		log.Printf("OAuth2 Authorize Response: %#v", resp)
 		osin.OutputJSON(resp, w, r)
-	})
-	http.HandleFunc(authPath+"/token", func(w http.ResponseWriter, r *http.Request) {
+	}
+
+	// token endpoint
+	tokenEndpointFunc := func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Access token endpoint")
 		resp := osinServer.NewResponse()
 
@@ -89,6 +92,12 @@ func BindOsin(authPath string, oStore *AuthStorage, sh session.Handler, lh AuthH
 		}
 		log.Printf("OAuth2 Token Response: %#v", resp)
 		osin.OutputJSON(resp, w, r)
-	})
+	}
+
+	// bind handler with pat
+	r.Get(authPath+"/authorize", authEndpointFunc)
+	r.Post(authPath+"/authorize", authEndpointFunc)
+	r.Get(authPath+"/token", tokenEndpointFunc)
+	r.Post(authPath+"/token", tokenEndpointFunc)
 
 }

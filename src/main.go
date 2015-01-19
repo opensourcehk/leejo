@@ -91,7 +91,7 @@ func main() {
 	rest.Pat(uih, sh, p, r)
 
 	// handle OAuth2 endpoints
-	oauth2.BindOsin("/oauth2", oStore, sh, lh)
+	oauth2.Pat("/oauth2", oStore, sh, lh, r)
 
 	// start the server
 	http.Handle("/", r)
