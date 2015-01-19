@@ -4,7 +4,7 @@ import (
 	"github.com/gourd/service"
 	"github.com/gourd/service/upperio"
 	"github.com/gourd/session"
-	"leejo/data"
+	"github.com/opensourcehk/leejo/lib/data"
 	"upper.io/db"
 )
 

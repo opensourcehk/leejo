@@ -35,9 +35,9 @@ check: get-deps get-test-deps
 	@echo "Unit Test"
 	@echo "========="
 	@cd src; go test -i; go test
-	@cd src/data; go test -i; go test
-	@cd src/oauth2; go test -i; go test
-	@cd src/rest; go test -i; go test
+	@cd lib/data; go test -i; go test
+	@cd lib/oauth2; go test -i; go test
+	@cd lib/rest; go test -i; go test
 	@cd tests; go test -i; go test
 	@echo
 
@@ -45,13 +45,14 @@ fmt:
 	@echo "Format Code"
 	@echo "==========="
 	cd src; go fmt
-	cd src/data; go fmt
-	cd src/oauth2; go fmt
+	cd lib/data; go fmt
+	cd lib/oauth2; go fmt
 	cd tests; go fmt
 	@echo
 
 clean:
 	rm -Rf gopath/pkg
+	rm -Rf gopath/src/github.com/opensourcehk/leejo
 	rm -Rf bin/*
 
 .PHONY: all update clean-gopath serve build test check fmt clean
@@ -69,7 +70,13 @@ bin/leejo_server: get-deps
 	cd src; go build -o ${BIN}/leejo_server
 	@echo
 
-get-deps: pat gourd osin upper-db-pgsql
+get-deps: pat gourd osin upper-db-pgsql leejo
+	@echo
+
+leejo: gopath/src/github.com/opensourcehk/leejo
+	go install github.com/opensourcehk/leejo/lib/data
+	go install github.com/opensourcehk/leejo/lib/oauth2
+	go install github.com/opensourcehk/leejo/lib/rest
 
 pat: gopath/src/github.com/gorilla/pat
 
@@ -83,6 +90,10 @@ upper-db-pgsql: \
 	gopath/src/menteslibres.net/gosexy/to \
 	gopath/src/upper.io/db/postgresql \
 	gopath/src/github.com/xiam/gopostgresql
+
+gopath/src/github.com/opensourcehk/leejo:
+	mkdir -p gopath/src/github.com/opensourcehk/leejo
+	ln -s ../../../../../lib gopath/src/github.com/opensourcehk/leejo/lib
 
 gopath/src/github.com/gorilla/pat:
 	go get -u github.com/gorilla/pat
@@ -108,23 +119,14 @@ gopath/src/github.com/xiam/gopostgresql:
 gopath/src/menteslibres.net/gosexy/to:
 	go get -u menteslibres.net/gosexy/to
 
-gopath/src/upper.io/db: \
-	gopath/src/upper.io/cache \
-	gopath/src/code.google.com/p/go-uuid/uuid
-	go get -u upper.io/db
-
-gopath/src/upper.io/cache:
+gopath/src/upper.io/db/postgresql:
+	go get -u code.google.com/p/go-uuid/uuid
 	go get -u upper.io/cache
-
-gopath/src/upper.io/db/postgresql: \
-	gopath/src/upper.io/db
+	go get -u upper.io/db
 	go get -u upper.io/db/postgresql
 
 gopath/src/github.com/RangelReale/osin:
 	go get -u github.com/RangelReale/osin
-
-gopath/src/code.google.com/p/go-uuid/uuid:
-	go get -u code.google.com/p/go-uuid/uuid
 
 .PHONY: pat gourd-service osin upper-db-pgsql
 

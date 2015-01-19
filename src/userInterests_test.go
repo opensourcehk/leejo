@@ -1,7 +1,7 @@
 package main
 
 import (
-	"leejo/rest"
+	"github.com/opensourcehk/leejo/lib/rest"
 	"testing"
 )
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"leejo/oauth2"
+	"github.com/opensourcehk/leejo/lib/oauth2"
 	"testing"
 )
 

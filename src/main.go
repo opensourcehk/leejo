@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/gorilla/pat"
 	session "github.com/gourd/session/oauth2"
-	"leejo/oauth2"
-	"leejo/rest"
+	"github.com/opensourcehk/leejo/lib/oauth2"
+	"github.com/opensourcehk/leejo/lib/rest"
 	"log"
 	"net/http"
 	"os"

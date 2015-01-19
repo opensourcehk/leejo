@@ -4,7 +4,7 @@ import (
 	"github.com/RangelReale/osin"
 	"github.com/gourd/service"
 	"github.com/gourd/session"
-	"leejo/data"
+	"github.com/opensourcehk/leejo/lib/data"
 	"log"
 )
 

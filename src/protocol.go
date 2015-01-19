@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"github.com/gourd/service"
 	"github.com/gourd/session"
+	"github.com/opensourcehk/leejo/lib/data"
+	"github.com/opensourcehk/leejo/lib/rest"
 	"io"
-	"leejo/data"
-	"leejo/rest"
 	"log"
 )
 
