@@ -19,11 +19,20 @@ type dbconfig struct {
 	Pass string `json:"pass"`
 }
 
-func getConfig() (conf config) {
+var confFn *string
+var conf config
 
-	// parse flags
-	confFn := flag.String("config", "config.json", "Path to config file")
+func init() {
+
+	confFn = flag.String("config", "config.json", "Path to config file")
 	flag.Parse()
+
+	// read config files
+	conf = getConfig()
+
+}
+
+func getConfig() (conf config) {
 
 	// read the config file to conf
 	confFile, err := ioutil.ReadFile(*confFn)

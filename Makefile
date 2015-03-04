@@ -34,7 +34,7 @@ clean-gopath:
 check: get-deps get-test-deps
 	@echo "Unit Test"
 	@echo "========="
-	@cd src; go test -i; go test
+	@cd src; go test -i; go test -config ../data/config.json
 	@cd lib/data; go test -i; go test
 	@cd lib/oauth2; go test -i; go test
 	@cd lib/rest; go test -i; go test

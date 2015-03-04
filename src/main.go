@@ -14,29 +14,11 @@ import (
 
 // set initial envirnment
 func init() {
-
 	// logs to stdout
 	log.SetOutput(os.Stdout)
-
 }
 
-func main() {
-
-	// read config files
-	conf := getConfig()
-
-	// connect to database
-	var dbsettings = db.Settings{
-		Host:     conf.Db.Host,
-		Database: conf.Db.Name,
-		User:     conf.Db.User,
-		Password: conf.Db.Pass,
-	}
-	dbs, err := db.Open(postgresql.Adapter, dbsettings)
-	if err != nil {
-		panic(err)
-	}
-	defer dbs.Close()
+func createHandler(dbs db.Database) http.Handler {
 
 	// Users REST API helper
 	uh := &UserRest{
@@ -93,8 +75,28 @@ func main() {
 	// handle OAuth2 endpoints
 	oauth2.Pat("/oauth2", oStore, sh, lh, r)
 
-	// start the server
-	http.Handle("/", r)
-	http.ListenAndServe(":8080", nil)
+	return r
+}
 
+func main() {
+
+	// connect to database
+	var dbsettings = db.Settings{
+		Host:     conf.Db.Host,
+		Database: conf.Db.Name,
+		User:     conf.Db.User,
+		Password: conf.Db.Pass,
+	}
+
+	dbs, err := db.Open(postgresql.Adapter, dbsettings)
+	if err != nil {
+		panic(err)
+	}
+	defer dbs.Close()
+
+	// start the server
+	err = http.ListenAndServe(":8080", createHandler(dbs))
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
 }
